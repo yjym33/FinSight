@@ -116,9 +116,9 @@ export default function DashboardPage() {
                       exit={{ opacity: 0, y: -10 }}
                       className="absolute top-full left-0 right-0 mt-2 bg-white rounded-2xl shadow-toss-large border border-gray-100 overflow-hidden z-50 max-h-[400px] overflow-y-auto"
                     >
-                      <SearchResultList query={searchQuery} onSelect={(code: string) => {
+                      <SearchResultList query={searchQuery} onSelect={(stock: any) => {
                           setSearchQuery('');
-                          router.push(`/stocks/${code}`);
+                          router.push(`/stocks/${stock.code}`);
                       }} />
                     </motion.div>
                   )}

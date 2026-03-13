@@ -1,4 +1,4 @@
-import { LayoutDashboard, Newspaper, MessageSquare, Heart, Settings, Wallet } from 'lucide-react';
+import { LayoutDashboard, Newspaper, MessageSquare, Heart, Settings, Wallet, BarChart2, Users } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/shared/lib/utils';
@@ -6,7 +6,9 @@ import { useGlobalSidebarStore } from '@/shared/store/sidebarStore';
 
 const menuItems = [
   { href: '/dashboard', label: '대시보드', icon: LayoutDashboard },
+  { href: '/compare', label: '종목 비교', icon: BarChart2 },
   { href: '/news', label: '뉴스', icon: Newspaper },
+  { href: '/community', label: '커뮤니티', icon: Users },
   { href: '/chat', label: '투자봇', icon: MessageSquare },
   { href: '/settings', label: '설정', icon: Settings },
 ];
@@ -18,8 +20,8 @@ export function Sidebar() {
   return (
     <aside className="sticky top-0 flex h-screen w-72 flex-col border-r border-gray-100 bg-white shadow-[1px_0_0_rgb(0,0,0,0.02)]">
       <div className="flex h-20 items-center px-8">
-        <span className="text-[22px] font-bold tracking-tight text-toss-blue">Toss</span>
-        <span className="ml-1 text-[22px] font-bold tracking-tight text-toss-text-primary">Invest</span>
+        <span className="text-[22px] font-bold tracking-tight text-toss-blue">Fin</span>
+        <span className="ml-1 text-[22px] font-bold tracking-tight text-toss-text-primary">Sight</span>
       </div>
 
       <nav className="flex-1 space-y-1.5 p-5">

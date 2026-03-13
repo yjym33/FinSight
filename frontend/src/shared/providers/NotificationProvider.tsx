@@ -141,7 +141,11 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               exit={{ opacity: 0, scale: 0.9, y: -20 }}
               className="pointer-events-auto bg-white dark:bg-gray-800 rounded-2xl shadow-toss-large border border-gray-100 dark:border-gray-700 overflow-hidden flex cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
               onClick={() => {
-                if (activeToast.stockCode) router.push(`/stocks/${activeToast.stockCode}`);
+                if (activeToast.metadata?.postId) {
+                  router.push(`/community/posts/${activeToast.metadata.postId}`);
+                } else if (activeToast.stockCode) {
+                  router.push(`/stocks/${activeToast.stockCode}`);
+                }
                 setActiveToast(null);
               }}
             >

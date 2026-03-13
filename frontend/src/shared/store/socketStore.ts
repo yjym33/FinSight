@@ -22,19 +22,26 @@ interface SocketState {
   socket: Socket | null;
   isConnected: boolean;
   stockPrices: Record<string, StockPrice>;
-  connect: () => void;
+  notifications: any[];
+  connect: (userId?: string) => void;
   disconnect: () => void;
   setStockPrice: (data: StockPrice) => void;
+  addNotification: (notification: any) => void;
+  subscribeToUser: (userId: string) => void;
 }
 
 export const useSocketStore = create<SocketState>((set, get) => ({
   socket: null,
   isConnected: false,
   stockPrices: {},
+  notifications: [],
 
-  connect: () => {
+  connect: (userId?: string) => {
     const { socket } = get();
-    if (socket?.connected) return;
+    if (socket?.connected) {
+      if (userId) get().subscribeToUser(userId);
+      return;
+    }
 
     const wsUrl = process.env.NEXT_PUBLIC_WS_URL || 'http://localhost:8000';
     const newSocket = io(wsUrl, {
@@ -47,6 +54,9 @@ export const useSocketStore = create<SocketState>((set, get) => ({
     newSocket.on('connect', () => {
       console.log('WebSocket connected');
       set({ isConnected: true });
+      if (userId) {
+        newSocket.emit('user:subscribe', userId);
+      }
     });
 
     newSocket.on('disconnect', () => {
@@ -54,8 +64,8 @@ export const useSocketStore = create<SocketState>((set, get) => ({
       set({ isConnected: false });
     });
 
-    newSocket.on('connect_error', (error) => {
-      console.error('WebSocket connection error:', error);
+    newSocket.on('notification:new', (notification) => {
+      get().addNotification(notification);
     });
 
     newSocket.on('stock:price', (data: StockPrice) => {
@@ -63,6 +73,19 @@ export const useSocketStore = create<SocketState>((set, get) => ({
     });
 
     set({ socket: newSocket });
+  },
+
+  subscribeToUser: (userId: string) => {
+    const { socket, isConnected } = get();
+    if (socket && isConnected) {
+      socket.emit('user:subscribe', userId);
+    }
+  },
+
+  addNotification: (notification) => {
+    set((state) => ({
+      notifications: [notification, ...state.notifications],
+    }));
   },
 
   setStockPrice: (data) => {

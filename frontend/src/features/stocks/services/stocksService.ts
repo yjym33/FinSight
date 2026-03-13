@@ -28,4 +28,8 @@ export const stocksService = {
     } | null>(`/stocks/${stockCode}/investors`);
     return response.data;
   },
+  compareStocks: async (codes: string[]) => {
+    const response = await api.get('/stocks/compare', { params: { codes: codes.join(',') } });
+    return response.data;
+  },
 };

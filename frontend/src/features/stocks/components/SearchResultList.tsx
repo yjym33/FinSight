@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import api from '@/shared/api/api';
 
-export function SearchResultList({ query, onSelect }: { query: string, onSelect: (code: string) => void }) {
+export function SearchResultList({ query, onSelect }: { query: string, onSelect: (stock: any) => void }) {
   const { data: results, isLoading } = useQuery({
     queryKey: ['stocks', 'search', query],
     queryFn: async () => {
@@ -32,7 +32,7 @@ export function SearchResultList({ query, onSelect }: { query: string, onSelect:
       {results.map((stock: any) => (
         <button
           key={stock.code}
-          onClick={() => onSelect(stock.code)}
+          onClick={() => onSelect(stock)}
           className="w-full flex items-center justify-between px-6 py-4 hover:bg-toss-bg transition-colors text-left"
         >
           <div className="flex items-center gap-3">
