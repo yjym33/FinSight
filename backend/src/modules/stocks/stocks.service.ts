@@ -4,6 +4,7 @@ import { Repository, Like } from 'typeorm';
 import * as fs from 'fs';
 import { Stock } from './entities/stock.entity';
 import { KisService } from './kis.service';
+import { AnalysisService } from './analysis.service';
 
 /**
  * 주식 전반 비즈니스 로직 처리 서비스 (StocksService)
@@ -18,6 +19,7 @@ export class StocksService implements OnModuleInit {
     @InjectRepository(Stock)
     private stockRepository: Repository<Stock>,
     private kisService: KisService,
+    private analysisService: AnalysisService,
   ) {}
 
   async onModuleInit() {
@@ -81,6 +83,20 @@ export class StocksService implements OnModuleInit {
       stockName: dbStock?.name || kisPrice.stockName || code,
       market: dbStock?.market || (this.kisService.isOverseas(code) ? 'NASDAQ' : 'KRX'),
     };
+  }
+
+  async compareStocks(codes: string[], userId?: string) {
+    const results = await Promise.all(
+      codes.map(async (code) => {
+        const details = await this.getStockPriceWithDetail(code);
+        const analysis = await this.analysisService.getStockAnalysis(code, userId);
+        return {
+          ...details,
+          analysis,
+        };
+      }),
+    );
+    return results.filter(r => r !== null);
   }
 
   async getRanking(market: 'J' | 'K' = 'J', type: 'volume' | 'gainers' | 'losers' = 'volume') {

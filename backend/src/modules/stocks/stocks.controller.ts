@@ -57,6 +57,14 @@ export class StocksController {
     return this.stocksService.getRanking(market, type);
   }
 
+  @Get('compare')
+  @ApiOperation({ summary: 'Compare multiple stocks' })
+  async compare(@Query('codes') codes: string, @Request() req: any) {
+    const stockCodes = codes.split(',');
+    const userId = req.user?.id;
+    return this.stocksService.compareStocks(stockCodes, userId);
+  }
+
   @Post('sync')
   @ApiOperation({ summary: 'Sync stocks from KRX JSON file' })
   async sync() {
