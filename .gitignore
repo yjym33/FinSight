@@ -1,0 +1,20 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+.gemini/
+
+# Dependency directories (fallback)
+node_modules/
+
+# Environment variables (fallback)
+.env
+.env.local
+
+# Logs
+*.log
+backend/backend_logs.txt
+backend/debug.txt

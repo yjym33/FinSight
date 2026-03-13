@@ -1,0 +1,19 @@
+# compiled output
+/dist
+/node_modules
+
+# Logs
+backend_logs.txt
+debug.txt
+*.log
+
+# Scripts
+test-*.ts
+test-*.js
+
+# Environment
+.env
+.env.local
+
+# OS
+.DS_Store

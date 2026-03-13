@@ -1,0 +1,52 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --toss-bg: #F2F4F6;
+  --toss-card-bg: #FFFFFF;
+  --toss-text-primary: #191F28;
+  --toss-text-secondary: #6B7684;
+  --toss-text-placeholder: #ADB5BD;
+  --toss-border: #F2F4F6;
+  --toss-blue: #3182F6;
+  --toss-red: #F04452;
+  --toss-green: #00D084;
+}
+
+.dark {
+  --toss-bg: #111827;
+  --toss-card-bg: #1F2937;
+  --toss-text-primary: #F9FAFB;
+  --toss-text-secondary: #9CA3AF;
+  --toss-text-placeholder: #6B7280;
+  --toss-border: #374151;
+  --toss-blue: #3B82F6;
+  --toss-red: #EF4444;
+  --toss-green: #10B981;
+}
+
+@layer base {
+  body {
+    @apply bg-toss-bg text-toss-text-primary transition-colors duration-200;
+  }
+}
+
+/* Custom Utilities for Toss Design System with Theme Support */
+@layer utilities {
+  .bg-toss-bg { background-color: var(--toss-bg); }
+  .bg-white { background-color: var(--toss-card-bg); } /* Overriding white to card-bg in dark mode */
+  .text-toss-text-primary { color: var(--toss-text-primary); }
+  .text-toss-text-secondary { color: var(--toss-text-secondary); }
+  .text-toss-text-placeholder { color: var(--toss-text-placeholder); }
+  .border-gray-100, .border-gray-50 { border-color: var(--toss-border); }
+  .text-toss-red { color: var(--toss-red); }
+  .text-toss-blue { color: var(--toss-blue); }
+  .text-toss-green { color: var(--toss-green); }
+  .bg-toss-red { background-color: var(--toss-red); }
+  .bg-toss-blue { background-color: var(--toss-blue); }
+  .bg-toss-green { background-color: var(--toss-green); }
+  .shadow-toss {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04);
+  }
+}
