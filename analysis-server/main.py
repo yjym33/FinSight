@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import strategy, profile, trades
+from app.routers import strategy, profile, trades, chat
 
 app = FastAPI(
     title="Investment Analysis Server",
@@ -19,6 +19,7 @@ app.add_middleware(
 app.include_router(strategy.router, prefix="/analyze", tags=["Strategy Analysis"])
 app.include_router(profile.router, prefix="/analyze", tags=["Profile Analysis"])
 app.include_router(trades.router, prefix="/analyze", tags=["Trades Analysis"])
+app.include_router(chat.router, prefix="/chat", tags=["AI Agent"])
 
 
 @app.get("/")
@@ -29,3 +30,9 @@ async def root():
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
+
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+
