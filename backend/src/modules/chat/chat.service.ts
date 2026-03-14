@@ -82,12 +82,22 @@ export class ChatService {
 
     // Fetch context (latest news)
     const news = await this.newsService.findAll(undefined, 5);
-    const context = news
-      .map((n) => `[${n.source}] ${n.title}: ${n.summary}`)
-      .join('\n');
+    
+    // Fetch recent chat history for context
+    const recentMessages = await this.messageRepository.find({
+      where: { sessionId },
+      order: { createdAt: 'DESC' },
+      take: 10,
+    });
+    
+    // Map to the format Python agent expects: List[dict] with role and content
+    const chatHistory = recentMessages.reverse().map(m => ({
+      role: m.sender === MessageSender.USER ? 'user' : 'assistant',
+      content: m.message
+    }));
 
-    // Generate real AI response
-    const botResponse = await this.llmService.generateResponse(userMessage, context);
+    // Generate real AI response through Analysis Server Agent
+    const botResponse = await this.llmService.chatWithAgent(userMessage, chatHistory, news);
     
     return this.addMessage(sessionId, botResponse, MessageSender.BOT);
   }

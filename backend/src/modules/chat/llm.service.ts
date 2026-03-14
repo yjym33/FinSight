@@ -8,11 +8,14 @@ export class LLMService {
   private readonly logger = new Logger(LLMService.name);
   private readonly apiKey: string;
 
+  private readonly analysisServerUrl: string;
+
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
   ) {
     this.apiKey = this.configService.get<string>('OPENAI_API_KEY') || '';
+    this.analysisServerUrl = this.configService.get<string>('ANALYSIS_SERVER_URL') || 'http://localhost:8000';
   }
 
   async generateResponse(prompt: string, context?: string): Promise<string> {
@@ -55,6 +58,27 @@ ${context ? `\n참고할 현재 시장 뉴스:\n${context}` : ''}`;
         this.logger.error(`API response error: ${JSON.stringify(error.response.data)}`);
       }
       return '죄송합니다. AI 응답을 생성하는 중에 오류가 발생했습니다.';
+    }
+  }
+
+  /**
+   * AI 에이전트와 통신 (Python analysis-server 활용)
+   */
+  async chatWithAgent(message: string, chatHistory: any[] = [], newsContext: any[] = []): Promise<string> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.post(`${this.analysisServerUrl}/chat/chat`, {
+          message,
+          chat_history: chatHistory,
+          context_news: newsContext,
+        })
+      );
+
+      return response.data.answer;
+    } catch (error) {
+      this.logger.error(`Error calling Analysis Server Agent: ${error.message}`);
+      // Fallback to basic generateResponse if analysis-server is down
+      return this.generateResponse(message, JSON.stringify(newsContext));
     }
   }
 }
