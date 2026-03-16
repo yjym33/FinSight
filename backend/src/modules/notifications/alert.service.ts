@@ -3,6 +3,7 @@ import { NotificationsService } from './notifications.service';
 import { NotificationType } from './entities/notification.entity';
 import { WatchlistService } from '../watchlist/watchlist.service';
 import { UsersSettingsService } from '../users/users-settings.service';
+import { UsersService } from '../users/users.service';
 import { WebsocketGateway } from '../websocket/websocket.gateway';
 import { AnalysisService } from '../stocks/analysis.service';
 
@@ -24,6 +25,7 @@ export class AlertService {
     @Inject(forwardRef(() => WebsocketGateway))
     private readonly websocketGateway: WebsocketGateway,
     private readonly analysisService: AnalysisService,
+    private readonly usersService: UsersService,
   ) {}
 
   async checkPriceAlerts(stockPrice: any) {
@@ -88,6 +90,47 @@ export class AlertService {
           
           // Update cooldown
           this.lastAlertMap.set(cooldownKey, Date.now());
+        }
+      }
+    }
+  }
+
+  async handleNewNews(news: any) {
+    this.logger.log(`Checking news alert for: ${news.title}`);
+    
+    // For now, let's notify all users about "Macro" news if it's significant
+    // OR notify users if the news is related to a stock in their watchlist
+    if (news.relatedStockCode) {
+      const watchlistEntries = await this.watchlistService.findByStockCode(news.relatedStockCode);
+      for (const entry of watchlistEntries) {
+        const settings = await this.userSettingsService.findByUserId(entry.userId);
+        if (settings && settings.aiAlertEnabled) {
+          const notification = await this.notificationsService.create({
+            userId: entry.userId,
+            type: NotificationType.NEWS_KEYWORD,
+            title: `📰 관련 뉴스: ${entry.stockName}`,
+            message: news.title,
+            stockCode: news.relatedStockCode,
+            metadata: { newsId: news.id }
+          });
+          this.websocketGateway.sendToUser(entry.userId, 'notification:new', notification);
+        }
+      }
+    } else {
+      // 매크로 뉴스 알림
+      // 모든 사용자를 조회하여 AI 알림 설정이 켜져있는 경우 알림 전송
+      const users = await this.usersService.findAll();
+      for (const user of users) {
+        const settings = await this.userSettingsService.findByUserId(user.id);
+        if (settings && settings.aiAlertEnabled) {
+          const notification = await this.notificationsService.create({
+            userId: user.id,
+            type: NotificationType.NEWS_KEYWORD,
+            title: `🌐 주요 거시경제 뉴스`,
+            message: news.title,
+            metadata: { newsId: news.id, category: news.category }
+          });
+          this.websocketGateway.sendToUser(user.id, 'notification:new', notification);
         }
       }
     }

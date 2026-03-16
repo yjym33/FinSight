@@ -1,25 +1,26 @@
-'use client';
-
 import { useState, useRef, useEffect } from 'react';
-import { Send, Sparkles, MessageCircle } from 'lucide-react';
+import { Send, Sparkles, MessageCircle, Bot, Zap, ArrowDown, User as UserIcon } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { motion, AnimatePresence } from 'framer-motion';
 import { chatService } from '@/features/chat/services/chatService';
 import { ChatMessage } from './ChatMessage';
-import { Button } from '@/shared/components/ui/Button';
+
+// Shadcn UI Components
+import { Card } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Separator } from '@/components/ui/separator';
 
 interface ChatWindowProps {
-  sessionId: string; // 현재 활성화된 채팅 세션 ID
+  sessionId: string;
+  initialMessage?: string;
 }
 
-/**
- * 인공지능 투자 비서 대화창 컴포넌트
- * 역할: 선택된 세션(sessionId)의 이전 대화 내역을 불러오고, 새 메시지를 전송하여 AI와 대화하는 기능을 담당합니다.
- * React Query를 통해 메시지 상태를 관리하며 낙관적 업데이트(Optimistic Update)를 적용해 빠른 반응성을 제공합니다.
- */
-export function ChatWindow({ sessionId }: ChatWindowProps) {
+export function ChatWindow({ sessionId, initialMessage }: ChatWindowProps) {
   const [message, setMessage] = useState('');
-  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
   const queryClient = useQueryClient();
   const queryKey = ['chatMessages', sessionId];
 
@@ -31,13 +32,9 @@ export function ChatWindow({ sessionId }: ChatWindowProps) {
   const sendMutation = useMutation({
     mutationFn: (msg: string) => chatService.sendMessage(sessionId, msg),
     onMutate: async (newMsg) => {
-      // Cancel any outgoing refetches (so they don't overwrite our optimistic update)
       await queryClient.cancelQueries({ queryKey });
-
-      // Snapshot the previous value
       const previousMessages = queryClient.getQueryData(queryKey);
 
-      // Optimistically update to the new value
       const optimisticMessage = {
         id: 'optimistic-' + Date.now(),
         sender: 'user',
@@ -46,123 +43,150 @@ export function ChatWindow({ sessionId }: ChatWindowProps) {
       };
 
       queryClient.setQueryData(queryKey, (old: any) => [...(old || []), optimisticMessage]);
-
-      // Return a context object with the snapshotted value
       return { previousMessages };
     },
     onError: (err, newMsg, context: any) => {
-      // Roll back to the previous value if error occurs
       queryClient.setQueryData(queryKey, context.previousMessages);
     },
     onSettled: () => {
-      // Always refetch after error or success to sync with the server
       queryClient.invalidateQueries({ queryKey });
     },
   });
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (scrollRef.current) {
+      const scrollContainer = scrollRef.current.querySelector('[data-radix-scroll-area-viewport]');
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+    }
   }, [messages, sendMutation.isPending]);
+  
+  // Auto-send initial message if chat is new
+  useEffect(() => {
+    if (initialMessage && messages && messages.length === 0 && !sendMutation.isPending) {
+        sendMutation.mutate(initialMessage);
+    }
+  }, [initialMessage, messages, sendMutation]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() && !sendMutation.isPending) {
       const msgToSend = message;
-      setMessage(''); // Clear input immediately
+      setMessage('');
       sendMutation.mutate(msgToSend);
     }
   };
 
   return (
-    <div className="flex h-full flex-col bg-white rounded-toss-large overflow-hidden border border-gray-100 shadow-sm">
+    <Card className="flex h-full flex-col border-none bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-2xl shadow-slate-200/50 dark:shadow-none rounded-[40px] overflow-hidden">
       {/* Chat Header */}
-      <div className="flex h-16 items-center justify-between border-b border-gray-50 bg-white px-6">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-toss-blue/10 text-toss-blue">
-            <Sparkles className="h-5 w-5" />
+      <div className="flex h-20 items-center justify-between border-b border-slate-100 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-8">
+        <div className="flex items-center gap-4">
+          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-toss-blue/10 text-toss-blue shadow-inner relative overflow-hidden group">
+            <div className="absolute inset-0 bg-toss-blue/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <Bot className="h-6 w-6 relative z-10" />
           </div>
           <div>
-            <h3 className="text-[15px] font-bold text-toss-text-primary">인공지능 투자 비서</h3>
-            <p className="text-[12px] text-green-500 font-medium flex items-center gap-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse" /> 실시간 분석 중
-            </p>
+            <h3 className="text-base font-black text-slate-900 dark:text-slate-100">투자 분석 전문가</h3>
+            <div className="flex items-center gap-2">
+              <span className="flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span className="text-[11px] font-black text-green-600 dark:text-green-500 uppercase tracking-widest">Active Intelligence</span>
+            </div>
           </div>
+        </div>
+        <div className="flex items-center gap-2">
+           <Badge variant="outline" className="rounded-xl border-slate-200 text-slate-400 font-bold px-3 py-1">GPT-4o Optimized</Badge>
         </div>
       </div>
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto bg-toss-bg/30 p-8">
-        {isLoading ? (
-          <div className="flex h-full flex-col items-center justify-center gap-3">
-            <div className="h-10 w-10 animate-spin rounded-full border-4 border-toss-blue border-t-transparent" />
-            <p className="text-[14px] font-bold text-toss-text-secondary">메시지를 불러오고 있어요</p>
-          </div>
-        ) : messages?.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center text-center">
-            <div className="mb-4 rounded-full bg-white p-6 shadow-sm">
-              <MessageCircle className="h-10 w-10 text-toss-text-placeholder" />
-            </div>
-            <p className="text-[18px] font-bold text-toss-text-primary">반가워요!</p>
-            <p className="mt-2 text-[15px] text-toss-text-secondary leading-relaxed">
-              시장 분석이나 종목 추천 등<br />
-              궁금한 내용을 물어보세요.
-            </p>
-          </div>
-        ) : (
-          <div className="max-w-2xl mx-auto">
-            {messages?.map((msg: any) => (
-              <ChatMessage key={msg.id} message={msg} />
-            ))}
-            {sendMutation.isPending && (
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                className="flex items-end gap-2 mb-6"
-              >
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-toss-blue/10 text-[12px] font-bold text-toss-blue flex-shrink-0 animate-pulse">
-                  AI
+      <div className="flex-1 overflow-hidden bg-slate-50/30 dark:bg-slate-950/30">
+        <ScrollArea ref={scrollRef} className="h-full px-8 py-10">
+          <div className="max-w-3xl mx-auto space-y-8">
+            {isLoading ? (
+              <div className="flex h-[400px] flex-col items-center justify-center gap-4">
+                <div className="h-12 w-12 bg-toss-blue/10 rounded-2xl flex items-center justify-center animate-bounce">
+                   <Zap className="h-6 w-6 text-toss-blue fill-toss-blue" />
                 </div>
-                <div className="bg-white text-toss-text-primary rounded-toss-base rounded-tl-none border border-gray-100 px-5 py-4 shadow-sm">
-                  <div className="flex gap-1.5 h-1.5 items-center">
-                    {[0, 0.2, 0.4].map((delay) => (
-                      <motion.div 
-                        key={delay}
-                        animate={{ opacity: [0.3, 1, 0.3] }} 
-                        transition={{ repeat: Infinity, duration: 1.5, delay }}
-                        className="h-1.5 w-1.5 rounded-full bg-toss-blue" 
-                      />
-                    ))}
-                  </div>
+                <p className="text-sm font-black text-slate-400 uppercase tracking-widest">이전 대화 분석 중...</p>
+              </div>
+            ) : messages?.length === 0 ? (
+              <div className="flex h-[400px] flex-col items-center justify-center text-center px-10">
+                <div className="mb-8 rounded-[32px] bg-white dark:bg-slate-800 p-10 shadow-2xl shadow-slate-200/50 dark:shadow-none">
+                  <MessageCircle className="h-12 w-12 text-toss-blue" />
                 </div>
-              </motion.div>
+                <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100 mb-3">투자의 지침이 되어 드릴게요</h3>
+                <p className="max-w-xs mx-auto text-[15px] font-medium text-slate-500 leading-relaxed">
+                  궁금한 증권사 레포트 내용이나,<br />
+                  실시간 종목 호재를 물어보세요.
+                </p>
+              </div>
+            ) : (
+              <>
+                {messages?.map((msg: any) => (
+                  <ChatMessage key={msg.id} message={msg} />
+                ))}
+                {sendMutation.isPending && (
+                  <motion.div 
+                    initial={{ opacity: 0, scale: 0.95, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    className="flex items-start gap-4 mb-10"
+                  >
+                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-toss-blue/10 text-toss-blue shadow-inner flex-shrink-0 animate-pulse">
+                      <Bot className="h-5 w-5" />
+                    </div>
+                    <div className="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-[24px] rounded-tl-none px-6 py-5 shadow-sm">
+                      <div className="flex gap-2 items-center h-4">
+                        {[0, 0.2, 0.4].map((delay) => (
+                          <motion.div 
+                            key={delay}
+                            animate={{ scale: [1, 1.5, 1], opacity: [0.3, 1, 0.3] }} 
+                            transition={{ repeat: Infinity, duration: 1.2, delay }}
+                            className="h-1.5 w-1.5 rounded-full bg-toss-blue" 
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  </motion.div>
+                )}
+              </>
             )}
-            <div ref={messagesEndRef} />
           </div>
-        )}
+        </ScrollArea>
       </div>
 
       {/* Input section */}
-      <div className="bg-white p-6 border-t border-gray-50">
-        <form onSubmit={handleSubmit} className="mx-auto max-w-2xl relative">
-          <input
+      <div className="bg-white/50 dark:bg-slate-900/50 p-8 border-t border-slate-100 dark:border-slate-800">
+        <form onSubmit={handleSubmit} className="mx-auto max-w-3xl relative group">
+          <Input
             value={message}
             onChange={(e) => setMessage(e.target.value)}
-            placeholder="궁금한 내용을 입력하세요..."
+            placeholder="전문가에게 투자의 인사이트를 물어보세요..."
             disabled={sendMutation.isPending}
-            className="h-[60px] w-full items-center rounded-toss-base bg-toss-bg px-6 pr-20 text-[16px] text-toss-text-primary transition-all placeholder:text-toss-text-placeholder focus:bg-white focus:outline-none focus:ring-2 focus:ring-toss-blue/50"
+            className="h-[72px] w-full rounded-[24px] border-none bg-slate-100 dark:bg-slate-800/50 px-8 pr-24 text-[16px] font-bold text-slate-900 dark:text-slate-100 transition-all placeholder:text-slate-400 focus-visible:ring-toss-blue/30 shadow-inner group-hover:bg-white dark:group-hover:bg-slate-800 transition-colors"
           />
-          <button 
-            type="submit" 
-            disabled={sendMutation.isPending || !message.trim()}
-            className="absolute right-3 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center rounded-xl bg-toss-blue text-white shadow-lg shadow-toss-blue/20 transition-all hover:brightness-95 active:scale-95 disabled:scale-100 disabled:opacity-30"
-          >
-            <Send className="h-5 w-5" />
-          </button>
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-2">
+             <Button 
+               type="submit" 
+               disabled={sendMutation.isPending || !message.trim()}
+               size="icon"
+               className="h-12 w-12 rounded-xl bg-toss-blue hover:bg-toss-blue/90 text-white shadow-xl shadow-toss-blue/20 transition-all active:scale-95 disabled:scale-100 disabled:opacity-20 translate-x-0"
+             >
+               <Send className="h-6 w-6" />
+             </Button>
+          </div>
         </form>
-        <p className="mt-4 text-center text-[12px] text-toss-text-placeholder">
-          AI 비서의 응답은 참고용으로만 활용해주세요.
-        </p>
+        <div className="flex items-center justify-center gap-2 mt-6">
+           <Zap className="h-3 w-3 text-slate-300 fill-slate-300" />
+           <p className="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400">
+             Powered by Advacned Market Intelligence
+           </p>
+        </div>
       </div>
-    </div>
+    </Card>
   );
 }

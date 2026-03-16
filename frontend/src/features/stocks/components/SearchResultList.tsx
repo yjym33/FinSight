@@ -13,7 +13,7 @@ export function SearchResultList({ query, onSelect }: { query: string, onSelect:
 
   if (isLoading) {
     return (
-      <div className="p-8 text-center bg-white">
+      <div className="p-8 text-center bg-white dark:bg-slate-900">
         <div className="animate-spin h-6 w-6 border-2 border-toss-blue border-t-transparent rounded-full mx-auto" />
       </div>
     );
@@ -21,14 +21,14 @@ export function SearchResultList({ query, onSelect }: { query: string, onSelect:
 
   if (!results || results.length === 0) {
     return (
-      <div className="p-8 text-center bg-white">
+      <div className="p-8 text-center bg-white dark:bg-slate-900">
         <p className="text-toss-text-secondary text-[14px]">검색 결과가 없습니다.</p>
       </div>
     );
   }
 
   return (
-    <div className="bg-white py-2">
+    <div className="bg-white dark:bg-slate-900 py-2">
       {results.map((stock: any) => (
         <button
           key={stock.code}

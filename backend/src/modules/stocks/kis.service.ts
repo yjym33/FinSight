@@ -569,4 +569,46 @@ export class KisService implements OnModuleInit {
       return [];
     }
   }
+  async getMarketIndex(indexCode: '0001' | '1001' = '0001') {
+    try {
+      await this.ensureValidToken();
+      if (!this.accessToken) return null;
+
+      const baseUrl = this.configService.get<string>('KIS_URL');
+      const appKey = this.configService.get<string>('KIS_APP_KEY');
+      const secretKey = this.configService.get<string>('KIS_SECRET');
+
+      const response = await this.executeWithRateLimit(() => firstValueFrom(
+        this.httpService.get(`${baseUrl}/uapi/domestic-stock/v1/quotations/inquire-index-price`, {
+          params: {
+            fid_cond_mrkt_div_code: 'U',
+            fid_input_iscd: indexCode,
+          },
+          headers: {
+            'content-type': 'application/json',
+            'authorization': `Bearer ${this.accessToken}`,
+            'appkey': appKey,
+            'appsecret': secretKey,
+            'tr_id': 'FHPST01010000',
+          },
+        }),
+      ));
+
+      const data = response.data.output;
+      if (!data) return null;
+
+      return {
+        indexName: indexCode === '0001' ? 'KOSPI' : 'KOSDAQ',
+        price: parseFloat(data.bstp_nmix_prpr),
+        change: parseFloat(data.bstp_nmix_prdy_vrss),
+        changePercent: parseFloat(data.bstp_nmix_prdy_ctrt),
+        high: parseFloat(data.bstp_nmix_hgpr),
+        low: parseFloat(data.bstp_nmix_lwpr),
+        timestamp: new Date(),
+      };
+    } catch (error) {
+      this.logger.error(`Failed to fetch market index ${indexCode}: ${error.message}`);
+      return null;
+    }
+  }
 }

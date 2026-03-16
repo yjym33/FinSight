@@ -32,4 +32,13 @@ export const stocksService = {
     const response = await api.get('/stocks/compare', { params: { codes: codes.join(',') } });
     return response.data;
   },
+  getThemes: async () => {
+    const response = await api.get<{
+      theme: string;
+      reason: string;
+      stocks: string[];
+      strength: number;
+    }[]>('/stocks/themes');
+    return response.data;
+  },
 };

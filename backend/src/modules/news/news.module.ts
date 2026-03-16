@@ -1,4 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { HttpModule } from '@nestjs/axios';
 import { NewsController } from './news.controller';
@@ -13,6 +14,7 @@ import { WebsocketModule } from '../websocket/websocket.module';
     TypeOrmModule.forFeature([News]),
     HttpModule,
     forwardRef(() => WebsocketModule),
+    forwardRef(() => NotificationsModule),
   ],
   controllers: [NewsController],
   providers: [NewsService, NewsApiService, NewsScheduler],

@@ -9,9 +9,15 @@ export class NewsController {
 
   @Get()
   @ApiOperation({ summary: 'Get all news' })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'category', required: false, type: String })
-  async findAll(@Query('limit') limit?: number, @Query('category') category?: string) {
+  @ApiQuery({ name: 'q', required: false, type: String })
+  async findAll(
+    @Query('limit') limit?: number, 
+    @Query('category') category?: string,
+    @Query('q') query?: string
+  ) {
+    if (query) {
+      return this.newsService.findByKeyword(query);
+    }
     return this.newsService.findAll(category, limit || 50);
   }
 

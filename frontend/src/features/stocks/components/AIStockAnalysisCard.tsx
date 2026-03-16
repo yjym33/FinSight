@@ -26,17 +26,17 @@ export function AIStockAnalysisCard({ stockCode, stockName, changePercent }: AIS
 
   if (isLoading) {
     return (
-      <div className="bg-white rounded-toss-large p-8 shadow-toss border border-gray-100 mb-6 flex flex-col items-center justify-center min-h-[300px]">
+      <div className="bg-white dark:bg-slate-900 rounded-toss-large p-8 shadow-toss border border-gray-100 dark:border-slate-800 mb-6 flex flex-col items-center justify-center min-h-[300px]">
         <Loader2 className="h-8 w-8 text-toss-blue animate-spin mb-4" />
-        <p className="text-toss-text-secondary font-medium text-[14px]">AI가 종목뉴스와 시세를 분석 중입니다...</p>
+        <p className="text-toss-text-secondary dark:text-slate-400 font-medium text-[14px]">AI가 종목뉴스와 시세를 분석 중입니다...</p>
       </div>
     );
   }
 
   if (!analysis) {
     return (
-      <div className="bg-white rounded-toss-large p-8 shadow-toss border border-gray-100 mb-6 text-center">
-        <p className="text-toss-text-secondary font-medium text-[14px]">AI 분석 결과를 가져올 수 없습니다.</p>
+      <div className="bg-white dark:bg-slate-900 rounded-toss-large p-8 shadow-toss border border-gray-100 dark:border-slate-800 mb-6 text-center">
+        <p className="text-toss-text-secondary dark:text-slate-400 font-medium text-[14px]">AI 분석 결과를 가져올 수 없습니다.</p>
       </div>
     );
   }
@@ -52,7 +52,7 @@ export function AIStockAnalysisCard({ stockCode, stockName, changePercent }: AIS
   ];
 
   return (
-    <div className="bg-white rounded-toss-large p-8 shadow-toss border border-gray-100 mb-6 relative overflow-hidden group">
+    <div className="bg-white dark:bg-slate-900 rounded-toss-large p-8 shadow-toss border border-gray-100 dark:border-slate-800 mb-6 relative overflow-hidden group">
       {/* Decorative gradient background that works in both themes */}
       <div className="absolute inset-0 bg-gradient-to-br from-purple-50/10 via-transparent to-purple-50/20 dark:from-purple-900/10 dark:to-transparent pointer-events-none" />
 
@@ -76,7 +76,7 @@ export function AIStockAnalysisCard({ stockCode, stockName, changePercent }: AIS
             key={idx} 
             className="flex gap-4"
           >
-            <div className="mt-1 shrink-0 bg-toss-bg p-2 rounded-xl border border-gray-100">
+            <div className="mt-1 shrink-0 bg-toss-bg dark:bg-slate-800 p-2 rounded-xl border border-gray-100 dark:border-slate-700">
               {icons[idx] || icons[2]}
             </div>
             <p className="text-[14px] leading-relaxed text-toss-text-secondary font-medium">

@@ -11,6 +11,12 @@ import { User } from '../users/entities/user.entity';
 @ApiBearerAuth()
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
+  
+  @Get('recommendations')
+  @ApiOperation({ summary: 'Get real-time recommended questions for chat' })
+  async getRecommendations() {
+    return this.chatService.getRecommendedQuestions();
+  }
 
   @Get('sessions')
   @ApiOperation({ summary: 'Get all chat sessions for current user' })

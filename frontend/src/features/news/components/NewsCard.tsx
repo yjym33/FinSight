@@ -40,7 +40,7 @@ export function NewsCard({ news }: NewsCardProps) {
       whileHover={{ y: -4 }}
       transition={{ duration: 0.3 }}
     >
-      <Card className="group h-full p-0 overflow-hidden border-none bg-white hover:shadow-2xl">
+      <Card className="group h-full p-0 overflow-hidden border-none bg-white dark:bg-slate-900/50 hover:shadow-2xl dark:hover:bg-slate-900 transition-all">
         <a 
           href={news.url} 
           target="_blank" 
@@ -49,13 +49,13 @@ export function NewsCard({ news }: NewsCardProps) {
         >
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-toss-bg text-[10px] font-bold text-toss-blue">
+              <div className="flex h-6 w-6 items-center justify-center rounded-full bg-toss-bg dark:bg-slate-800 text-[10px] font-bold text-toss-blue">
                 {news.source[0]}
               </div>
               <span className="text-[14px] font-bold text-toss-text-primary">{news.source}</span>
             </div>
             {news.relatedStockCode && (
-              <div className="flex items-center gap-1 rounded-full bg-toss-bg px-3 py-1 text-[12px] font-bold text-toss-blue">
+              <div className="flex items-center gap-1 rounded-full bg-toss-bg dark:bg-slate-800 px-3 py-1 text-[12px] font-bold text-toss-blue">
                 <Tag className="h-3 w-3" />
                 {news.relatedStockCode}
               </div>
@@ -70,7 +70,7 @@ export function NewsCard({ news }: NewsCardProps) {
             {news.summary}
           </p>
 
-          <div className="mt-auto flex items-center justify-between border-t border-gray-50 pt-6">
+          <div className="mt-auto flex items-center justify-between border-t border-gray-50 dark:border-slate-800 pt-6">
             <div className="flex items-center gap-1.5 text-[13px] text-toss-text-placeholder">
               <Clock className="h-3.5 w-3.5" />
               {formatTimeAgo(news.publishedAt)}

@@ -34,14 +34,14 @@ export function StockCommunity({ stockCode }: StockCommunityProps) {
   };
 
   return (
-    <Card className="flex h-full flex-col bg-white overflow-hidden shadow-md">
+    <Card className="flex h-full flex-col bg-white dark:bg-slate-900 overflow-hidden shadow-md border-slate-200 dark:border-slate-800">
       {/* Header */}
-      <div className="flex items-center justify-between border-b px-6 py-4">
+      <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 px-6 py-4">
         <div className="flex items-center gap-2">
           <MessageCircle className="h-5 w-5 text-toss-blue" />
           <h3 className="text-lg font-bold text-toss-text-primary">실시간 커뮤니티</h3>
         </div>
-        <span className="rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-medium text-toss-blue">
+        <span className="rounded-full bg-blue-50 dark:bg-blue-900/20 px-2.5 py-0.5 text-xs font-medium text-toss-blue">
           기분 좋은 대화를 나눠요
         </span>
       </div>
@@ -57,8 +57,8 @@ export function StockCommunity({ stockCode }: StockCommunityProps) {
           </div>
         ) : comments.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center space-y-3 py-10">
-            <div className="rounded-full bg-gray-50 p-4">
-              <MessageCircle className="h-8 w-8 text-gray-300" />
+            <div className="rounded-full bg-gray-50 dark:bg-slate-800 p-4">
+              <MessageCircle className="h-8 w-8 text-gray-300 dark:text-slate-600" />
             </div>
             <p className="text-sm text-toss-text-placeholder">첫 번째로 의견을 남겨보세요!</p>
           </div>
@@ -73,7 +73,7 @@ export function StockCommunity({ stockCode }: StockCommunityProps) {
                 className="group flex flex-col items-start gap-1"
               >
                 <div className="flex items-center gap-2">
-                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-50">
+                  <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-50 dark:bg-blue-900/30">
                     <User className="h-3.5 w-3.5 text-toss-blue" />
                   </div>
                   <span className="text-sm font-semibold text-toss-text-secondary">
@@ -83,7 +83,7 @@ export function StockCommunity({ stockCode }: StockCommunityProps) {
                     {formatDistanceToNow(new Date(comment.createdAt), { addSuffix: true, locale: ko })}
                   </span>
                 </div>
-                <div className="max-w-[85%] rounded-[20px] bg-gray-50 px-4 py-2 text-[15px] leading-relaxed text-toss-text-primary group-hover:bg-gray-100 transition-colors">
+                <div className="max-w-[85%] rounded-[20px] bg-gray-50 dark:bg-slate-800 px-4 py-2 text-[15px] leading-relaxed text-toss-text-primary group-hover:bg-gray-100 dark:group-hover:bg-slate-700 transition-colors">
                   {comment.content}
                 </div>
               </motion.div>
@@ -93,7 +93,7 @@ export function StockCommunity({ stockCode }: StockCommunityProps) {
       </div>
 
       {/* Footer / Input */}
-      <div className="border-t px-4 py-4 bg-gray-50/50">
+      <div className="border-t border-slate-100 dark:border-slate-800 px-4 py-4 bg-gray-50/50 dark:bg-slate-900/50">
         <form onSubmit={handleSubmit} className="flex gap-2">
           <div className="relative flex-1">
             <Input
@@ -102,7 +102,7 @@ export function StockCommunity({ stockCode }: StockCommunityProps) {
               onFocus={() => setIsFocused(true)}
               onBlur={() => setIsFocused(false)}
               placeholder="자유롭게 의견을 나눠보세요"
-              className={`pr-10 bg-white transition-all shadow-sm ${isFocused ? 'ring-2 ring-toss-blue/20' : ''}`}
+              className={`pr-10 bg-white dark:bg-slate-950 transition-all shadow-sm border-slate-100 dark:border-slate-800 ${isFocused ? 'ring-2 ring-toss-blue/20' : ''}`}
             />
             {commentInput && (
                <button 

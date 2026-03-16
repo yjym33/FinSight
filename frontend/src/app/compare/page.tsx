@@ -236,10 +236,10 @@ export default function ComparePage() {
                                     setIsSearchOpen(true);
                                 }}
                                 onFocus={() => setIsSearchOpen(true)}
-                                className="h-12 rounded-xl bg-white shadow-sm"
+                                className="h-12 rounded-xl bg-white dark:bg-slate-900 shadow-sm border border-gray-100 dark:border-slate-800"
                             />
                             {isSearchOpen && searchQuery && (
-                                <div className="absolute top-14 left-0 right-0 z-50 overflow-hidden rounded-2xl bg-white shadow-2xl border border-gray-100">
+                                <div className="absolute top-14 left-0 right-0 z-50 overflow-hidden rounded-2xl bg-white dark:bg-slate-900 shadow-2xl border border-gray-100 dark:border-slate-800">
                                     <SearchResultList 
                                         query={searchQuery} 
                                         onSelect={addStock} 
@@ -265,7 +265,7 @@ export default function ComparePage() {
                     {selectedCodes.map((code) => (
                         <div 
                             key={code} 
-                            className="flex items-center gap-2 rounded-full bg-white px-4 py-2 border border-gray-200 shadow-sm"
+                            className="flex items-center gap-2 rounded-full bg-white dark:bg-slate-800 px-4 py-2 border border-gray-200 dark:border-slate-700 shadow-sm"
                         >
                             <span className="text-[14px] font-bold text-toss-text-primary">
                                 {codeToName[code] || code}
@@ -279,7 +279,7 @@ export default function ComparePage() {
                         </div>
                     ))}
                     {selectedCodes.length === 0 && (
-                        <div className="flex w-full items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 bg-gray-50/50 py-12">
+                        <div className="flex w-full items-center justify-center rounded-2xl border-2 border-dashed border-gray-200 dark:border-slate-800 bg-gray-50/50 dark:bg-slate-900/50 py-12">
                             <div className="text-center">
                                 <BarChart2 className="mx-auto h-12 w-12 text-toss-text-placeholder mb-4" />
                                 <p className="text-[16px] font-medium text-toss-text-secondary">비교할 종목을 먼저 검색해서 추가해주세요.</p>
@@ -292,13 +292,13 @@ export default function ComparePage() {
                     <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
                         {/* Comparison Table */}
                         <Card className="lg:col-span-3 overflow-hidden border-none shadow-sm">
-                            <div className="px-8 py-6 border-b border-gray-50 flex items-center gap-2">
+                            <div className="px-8 py-6 border-b border-gray-100 dark:border-slate-800 flex items-center gap-2">
                                 <Info className="h-5 w-5 text-toss-blue" />
                                 <h3 className="text-[18px] font-bold text-toss-text-primary">재무 및 시세 지표 비교</h3>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full text-left">
-                                    <thead className="bg-gray-50/50">
+                                    <thead className="bg-gray-50/50 dark:bg-slate-800/50">
                                         <tr>
                                             <th className="px-8 py-4 text-[13px] font-bold text-toss-text-secondary uppercase">지표 명칭</th>
                                             {selectedCodes.map(code => (
@@ -308,7 +308,7 @@ export default function ComparePage() {
                                             ))}
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-50">
+                                    <tbody className="divide-y divide-gray-100 dark:divide-slate-800">
                                         <tr>
                                             <td className="px-8 py-5 text-[14px] font-medium text-toss-text-secondary">현재가</td>
                                             {selectedCodes.map(code => {
@@ -368,7 +368,7 @@ export default function ComparePage() {
                                                 );
                                             })}
                                         </tr>
-                                        <tr className="bg-toss-blue/5">
+                                        <tr className="bg-toss-blue/5 dark:bg-toss-blue/10">
                                             <td className="px-8 py-6 text-[14px] font-bold text-toss-blue">AI 분석 점수</td>
                                             {selectedCodes.map(code => {
                                                 const stock = (comparisonData as StockComparison[])?.find((s: StockComparison) => s.stockCode === code);
@@ -405,7 +405,7 @@ export default function ComparePage() {
                         <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {comparisonData?.map((stock: any) => (
                                 <Card key={stock.stockCode} className="border-none shadow-sm h-full flex flex-col">
-                                    <div className="p-6 border-b border-gray-50">
+                                    <div className="p-6 border-b border-gray-100 dark:border-slate-800">
                                         <h4 className="text-[16px] font-bold text-toss-text-primary flex items-center gap-2">
                                             <div className="h-2 w-2 rounded-full bg-toss-blue" />
                                             {stock.stockName} 요약

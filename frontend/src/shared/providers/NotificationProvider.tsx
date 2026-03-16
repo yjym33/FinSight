@@ -5,7 +5,7 @@ import { useWebSocket } from '@/shared/hooks/useWebSocket';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { notificationsService, Notification } from '@/shared/api/notificationsService';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, X, Info, TrendingUp, Newspaper, MessageSquare } from 'lucide-react';
+import { Bell, X, Info, TrendingUp, Newspaper, MessageSquare, BrainCircuit } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -116,7 +116,7 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
       case 'PRICE_ALARM': return <TrendingUp className="h-5 w-5 text-toss-blue" />;
       case 'NEWS_KEYWORD': return <Newspaper className="h-5 w-5 text-toss-green" />;
       case 'COMMUNITY_REPLY': return <MessageSquare className="h-5 w-5 text-orange-500" />;
-      case 'AI_REPORT': return <Bell className="h-5 w-5 text-purple-500" />;
+      case 'AI_REPORT': return <BrainCircuit className="h-5 w-5 text-purple-500" />;
       default: return <Info className="h-5 w-5 text-gray-400" />;
     }
   };
@@ -143,8 +143,12 @@ export function NotificationProvider({ children }: { children: React.ReactNode }
               onClick={() => {
                 if (activeToast.metadata?.postId) {
                   router.push(`/community/posts/${activeToast.metadata.postId}`);
+                } else if (activeToast.metadata?.sessionId) {
+                  router.push(`/chat?sessionId=${activeToast.metadata.sessionId}`);
                 } else if (activeToast.stockCode) {
                   router.push(`/stocks/${activeToast.stockCode}`);
+                } else if (activeToast.type === 'NEWS_KEYWORD') {
+                  router.push('/news');
                 }
                 setActiveToast(null);
               }}

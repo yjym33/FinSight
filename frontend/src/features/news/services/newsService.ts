@@ -12,9 +12,10 @@ export interface News {
 }
 
 export const newsService = {
-  getNews: async (category?: string, limit = 50): Promise<News[]> => {
+  getNews: async (category?: string, limit = 50, query?: string): Promise<News[]> => {
     const params = new URLSearchParams();
     if (category) params.append('category', category);
+    if (query) params.append('q', query);
     params.append('limit', limit.toString());
     const response = await api.get(`/news?${params.toString()}`);
     return response.data;

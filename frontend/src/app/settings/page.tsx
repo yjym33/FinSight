@@ -93,8 +93,8 @@ export default function SettingsPage() {
                     className={cn(
                       "flex items-center gap-4 px-5 py-4 rounded-2xl text-[16px] font-bold transition-all duration-200",
                       activeSegment === segment.id
-                        ? "bg-white text-toss-blue shadow-sm"
-                        : "text-toss-text-secondary hover:bg-gray-100/50"
+                        ? "bg-white dark:bg-slate-800 text-toss-blue shadow-sm"
+                        : "text-toss-text-secondary hover:bg-gray-100/50 dark:hover:bg-slate-800/50"
                     )}
                   >
                     <segment.icon className={cn("h-5 w-5", activeSegment === segment.id ? "text-toss-blue" : "text-toss-text-placeholder")} />
@@ -175,7 +175,7 @@ function GeneralSettings() {
       <motion.div 
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white rounded-[24px] p-8 shadow-toss border border-gray-100"
+        className="bg-white dark:bg-slate-900 rounded-[24px] p-8 shadow-toss border border-gray-100 dark:border-slate-800"
       >
         <h2 className="text-[20px] font-bold text-toss-text-primary mb-8">기본 정보</h2>
         
@@ -187,7 +187,7 @@ function GeneralSettings() {
             </div>
           </div>
 
-          <div className="h-[1px] bg-gray-50" />
+          <div className="h-[1px] bg-gray-50 dark:bg-slate-800" />
 
           <div className="flex items-center justify-between group">
             <div>
@@ -196,7 +196,7 @@ function GeneralSettings() {
             </div>
           </div>
 
-          <div className="h-[1px] bg-gray-50" />
+          <div className="h-[1px] bg-gray-50 dark:bg-slate-800" />
 
           <div className="flex items-center justify-between group">
             <div>
@@ -205,7 +205,7 @@ function GeneralSettings() {
             </div>
             <button 
               onClick={() => setIsChangingPassword(true)}
-              className="text-[14px] font-bold text-toss-blue bg-blue-50 px-4 py-2 rounded-xl hover:bg-blue-100 transition-colors"
+              className="text-[14px] font-bold text-toss-blue bg-blue-50 dark:bg-toss-blue/10 px-4 py-2 rounded-xl hover:bg-blue-100 dark:hover:bg-toss-blue/20 transition-colors"
             >
               변경
             </button>
@@ -228,7 +228,7 @@ function GeneralSettings() {
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-[400px] bg-white rounded-[32px] p-8 shadow-2xl overflow-hidden"
+              className="relative w-full max-w-[400px] bg-white dark:bg-slate-900 rounded-[32px] p-8 shadow-2xl overflow-hidden border border-gray-100 dark:border-slate-800"
             >
               {success ? (
                 <div className="py-12 text-center">
@@ -258,7 +258,7 @@ function GeneralSettings() {
                         required
                         value={passwordForm.oldPassword}
                         onChange={e => setPasswordForm(prev => ({ ...prev, oldPassword: e.target.value }))}
-                        className="w-full bg-toss-bg border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-toss-blue transition-all outline-none"
+                        className="w-full bg-toss-bg dark:bg-slate-800 border-none rounded-2xl px-5 py-4 text-toss-text-primary focus:ring-2 focus:ring-toss-blue transition-all outline-none"
                         placeholder="기존 비밀번호를 입력하세요"
                       />
                     </div>
@@ -283,7 +283,7 @@ function GeneralSettings() {
                           required
                           value={passwordForm.confirmPassword}
                           onChange={e => setPasswordForm(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                          className="w-full bg-toss-bg border-none rounded-2xl px-5 py-4 focus:ring-2 focus:ring-toss-blue transition-all outline-none"
+                          className="w-full bg-toss-bg dark:bg-slate-800 border-none rounded-2xl px-5 py-4 text-toss-text-primary focus:ring-2 focus:ring-toss-blue transition-all outline-none"
                           placeholder="새 비밀번호를 한 번 더 입력하세요"
                         />
                       </div>
@@ -333,7 +333,7 @@ function AISettings({ settings, onUpdate }: SettingComponentProps) {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
-      <div className="bg-white rounded-[24px] p-8 shadow-toss border border-gray-100">
+      <div className="bg-white dark:bg-slate-900 rounded-[24px] p-8 shadow-toss border border-gray-100 dark:border-slate-800">
         <h2 className="text-[20px] font-bold text-toss-text-primary mb-2">분석 스타일</h2>
         <p className="text-toss-text-secondary text-[14px] mb-8">AI가 뉴스와 시세를 분석할 때의 스타일을 선택하세요.</p>
         
@@ -345,8 +345,8 @@ function AISettings({ settings, onUpdate }: SettingComponentProps) {
               className={cn(
                 "w-full flex items-start gap-5 p-6 rounded-2xl border transition-all text-left",
                 settings.aiAnalysisStyle === style.id
-                  ? "border-toss-blue bg-blue-50/30"
-                  : "border-gray-100 hover:border-gray-200"
+                  ? "border-toss-blue bg-blue-50/30 dark:bg-toss-blue/10"
+                  : "border-gray-100 dark:border-slate-800 hover:border-gray-200 dark:hover:border-slate-700"
               )}
             >
               <div className={cn(
@@ -368,7 +368,7 @@ function AISettings({ settings, onUpdate }: SettingComponentProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-[24px] p-8 shadow-toss border border-gray-100">
+      <div className="bg-white dark:bg-slate-900 rounded-[24px] p-8 shadow-toss border border-gray-100 dark:border-slate-800">
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-[18px] font-bold text-toss-text-primary mb-1">변동 분석 리포트 자동 생성</h2>
@@ -396,14 +396,14 @@ function DisplaySettings({ settings, onUpdate }: SettingComponentProps) {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
-      <div className="bg-white rounded-[24px] p-8 shadow-toss border border-gray-100">
+      <div className="bg-white dark:bg-slate-900 rounded-[24px] p-8 shadow-toss border border-gray-100 dark:border-slate-800">
         <h2 className="text-[20px] font-bold text-toss-text-primary mb-8">기본 테마</h2>
         <div className="flex gap-4">
           <button 
             onClick={() => onUpdate({ theme: 'light' })}
             className={cn(
               "flex-1 p-6 rounded-2xl border flex flex-col items-center gap-3 transition-all",
-              settings.theme === 'light' ? "border-toss-blue bg-blue-50/30" : "border-gray-100"
+              settings.theme === 'light' ? "border-toss-blue bg-blue-50/30 dark:bg-toss-blue/10" : "border-gray-100 dark:border-slate-800"
             )}
           >
             <div className="w-16 h-12 bg-gray-50 rounded-lg border border-gray-100 mb-1" />
@@ -413,7 +413,7 @@ function DisplaySettings({ settings, onUpdate }: SettingComponentProps) {
             onClick={() => onUpdate({ theme: 'dark' })}
             className={cn(
               "flex-1 p-6 rounded-2xl border flex flex-col items-center gap-3 transition-all",
-              settings.theme === 'dark' ? "border-toss-blue bg-blue-50/30" : "border-gray-100"
+              settings.theme === 'dark' ? "border-toss-blue bg-blue-50/30 dark:bg-toss-blue/10" : "border-gray-100 dark:border-slate-800"
             )}
           >
             <div className="w-16 h-12 bg-gray-800 rounded-lg border border-gray-700 mb-1" />
@@ -422,14 +422,14 @@ function DisplaySettings({ settings, onUpdate }: SettingComponentProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-[24px] p-8 shadow-toss border border-gray-100">
+      <div className="bg-white dark:bg-slate-900 rounded-[24px] p-8 shadow-toss border border-gray-100 dark:border-slate-800">
         <h2 className="text-[20px] font-bold text-toss-text-primary mb-6">차트 색상 스타일</h2>
         <div className="flex gap-4">
           <button 
             onClick={() => onUpdate({ chartColorStyle: 'kr' })}
             className={cn(
               "flex-1 p-5 rounded-2xl border transition-all text-left",
-              settings.chartColorStyle === 'kr' ? "border-toss-blue bg-blue-50/30" : "border-gray-100"
+              settings.chartColorStyle === 'kr' ? "border-toss-blue bg-blue-50/30 dark:bg-toss-blue/10" : "border-gray-100 dark:border-slate-800"
             )}
           >
             <p className="text-[15px] font-bold text-toss-text-primary mb-3">한국식 (상승: 빨강, 하락: 파랑)</p>
@@ -442,7 +442,7 @@ function DisplaySettings({ settings, onUpdate }: SettingComponentProps) {
             onClick={() => onUpdate({ chartColorStyle: 'us' })}
             className={cn(
               "flex-1 p-5 rounded-2xl border transition-all text-left",
-              settings.chartColorStyle === 'us' ? "border-toss-blue bg-blue-50/30" : "border-gray-100"
+              settings.chartColorStyle === 'us' ? "border-toss-blue bg-blue-50/30 dark:bg-toss-blue/10" : "border-gray-100 dark:border-slate-800"
             )}
           >
             <p className="text-[15px] font-bold text-toss-text-primary mb-3">미국식 (상승: 초록, 하락: 빨강)</p>
@@ -470,7 +470,7 @@ function AlertSettings({ settings, onUpdate }: SettingComponentProps) {
       animate={{ opacity: 1, y: 0 }}
       className="space-y-6"
     >
-      <div className="bg-white rounded-[24px] p-8 shadow-toss border border-gray-100">
+      <div className="bg-white dark:bg-slate-900 rounded-[24px] p-8 shadow-toss border border-gray-100 dark:border-slate-800">
         <h2 className="text-[20px] font-bold text-toss-text-primary mb-2">실시간 주가 알림</h2>
         <p className="text-toss-text-secondary text-[14px] mb-10">변동폭이 설정한 기준을 넘으면 브라우저로 실시간 알림을 보냅니다.</p>
         
@@ -488,7 +488,7 @@ function AlertSettings({ settings, onUpdate }: SettingComponentProps) {
             onChange={(e) => setLocalThreshold(parseFloat(e.target.value))}
             onMouseUp={() => onUpdate({ alertThreshold: localThreshold })}
             onTouchEnd={() => onUpdate({ alertThreshold: localThreshold })}
-            className="w-full h-2 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-toss-blue"
+            className="w-full h-2 bg-gray-100 dark:bg-slate-800 rounded-lg appearance-none cursor-pointer accent-toss-blue"
           />
           <div className="flex justify-between mt-3 text-[12px] text-toss-text-placeholder font-medium">
             <span>민감함 (1%)</span>
@@ -498,7 +498,7 @@ function AlertSettings({ settings, onUpdate }: SettingComponentProps) {
         </div>
       </div>
 
-      <div className="bg-white rounded-[24px] p-8 shadow-toss border border-gray-100">
+      <div className="bg-white dark:bg-slate-900 rounded-[24px] p-8 shadow-toss border border-gray-100 dark:border-slate-800">
         <div className="flex items-center justify-between mb-8">
           <div>
             <h2 className="text-[18px] font-bold text-toss-text-primary mb-1">커뮤니티 활동 알림</h2>
@@ -515,7 +515,7 @@ function AlertSettings({ settings, onUpdate }: SettingComponentProps) {
           </div>
         </div>
 
-        <div className="h-[1px] bg-gray-50 mb-8" />
+        <div className="h-[1px] bg-gray-50 dark:bg-slate-800 mb-8" />
 
         <div className="flex items-center justify-between">
           <div>

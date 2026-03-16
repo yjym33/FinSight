@@ -53,4 +53,9 @@ export const chatService = {
   deleteSession: async (sessionId: string): Promise<void> => {
     await api.delete(`/chat/sessions/${sessionId}`);
   },
+  
+  getRecommendations: async (): Promise<string[]> => {
+    const response = await api.get('/chat/recommendations');
+    return response.data;
+  },
 };

@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routers import strategy, profile, trades, chat
+from app.routers import strategy, profile, trades, chat, market
 
 app = FastAPI(
     title="Investment Analysis Server",
@@ -19,6 +19,7 @@ app.add_middleware(
 app.include_router(strategy.router, prefix="/analyze", tags=["Strategy Analysis"])
 app.include_router(profile.router, prefix="/analyze", tags=["Profile Analysis"])
 app.include_router(trades.router, prefix="/analyze", tags=["Trades Analysis"])
+app.include_router(market.router, prefix="/analyze", tags=["Market Analysis"])
 app.include_router(chat.router, prefix="/chat", tags=["AI Agent"])
 
 

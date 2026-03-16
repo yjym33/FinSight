@@ -7,10 +7,10 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: 'bg-toss-blue text-white hover:brightness-95 active:scale-[0.98]',
-        secondary: 'bg-toss-bg text-toss-text-secondary hover:brightness-95 active:scale-[0.98]',
-        outline: 'border border-gray-200 bg-transparent text-toss-text-primary hover:bg-gray-50 active:scale-[0.98]',
-        ghost: 'text-toss-text-secondary hover:bg-gray-100 active:scale-[0.98]',
+        default: 'bg-toss-blue text-white hover:brightness-110 active:scale-[0.98] shadow-lg shadow-toss-blue/20',
+        secondary: 'bg-toss-bg dark:bg-slate-800 text-toss-text-secondary dark:text-slate-400 hover:brightness-110 active:scale-[0.98]',
+        outline: 'border border-gray-200 dark:border-slate-800 bg-transparent text-toss-text-primary hover:bg-gray-50 dark:hover:bg-slate-800 active:scale-[0.98]',
+        ghost: 'text-toss-text-secondary hover:bg-gray-100 dark:hover:bg-slate-800 active:scale-[0.98]',
         destructive: 'bg-red-500 text-white hover:bg-red-600 active:scale-[0.98]',
       },
       size: {

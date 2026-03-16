@@ -19,12 +19,12 @@ export function AIReasonBanner({ stockCode }: AIReasonBannerProps) {
 
   return (
     <div
-      className="mt-6 flex items-start gap-3 rounded-2xl bg-toss-bg p-5 border border-purple-100/50 relative overflow-hidden group cursor-default min-h-[80px]"
+      className="mt-6 flex items-start gap-3 rounded-2xl bg-toss-bg dark:bg-slate-800 p-5 border border-purple-100/50 dark:border-purple-900/30 relative overflow-hidden group cursor-default min-h-[80px]"
     >
       {/* Subtle Background Glow */}
       <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
 
-      <div className="mt-0.5 shrink-0 rounded-full bg-purple-100 p-1.5 text-purple-600">
+      <div className="mt-0.5 shrink-0 rounded-full bg-purple-100 dark:bg-purple-900/50 p-1.5 text-purple-600 dark:text-purple-400">
         <Sparkles className="h-4 w-4" />
       </div>
       
@@ -35,8 +35,8 @@ export function AIReasonBanner({ stockCode }: AIReasonBannerProps) {
         
         {isLoading ? (
           <div className="space-y-2 py-1">
-            <div className="h-3.5 w-full bg-gray-200 animate-pulse rounded" />
-            <div className="h-3.5 w-2/3 bg-gray-200 animate-pulse rounded" />
+            <div className="h-3.5 w-full bg-gray-200 dark:bg-slate-700 animate-pulse rounded" />
+            <div className="h-3.5 w-2/3 bg-gray-200 dark:bg-slate-700 animate-pulse rounded" />
           </div>
         ) : analysis?.reason ? (
           <motion.p 

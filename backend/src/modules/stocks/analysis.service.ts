@@ -3,6 +3,9 @@ import { LLMService } from '../chat/llm.service';
 import { NewsService } from '../news/news.service';
 import { KisService } from './kis.service';
 import { UsersSettingsService } from '../users/users-settings.service';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AnalysisService {
@@ -15,6 +18,8 @@ export class AnalysisService {
     private readonly newsService: NewsService,
     private readonly kisService: KisService,
     private readonly settingsService: UsersSettingsService,
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
   ) {}
 
   async getStockAnalysis(stockCode: string, userId?: string) {
@@ -99,6 +104,32 @@ ${styleInstruction}
     } catch (error) {
       this.logger.error(`Error in stock analysis: ${error.message}`);
       return null;
+    }
+  }
+
+  async getThemeClustering() {
+    // Cache for 30 mins
+    const cacheKey = 'market_themes';
+    const cached = this.cache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
+      return cached.data;
+    }
+
+    try {
+      const serverUrl = this.configService.get<string>('ANALYSIS_SERVER_URL') || 'http://localhost:8000';
+      const response = await firstValueFrom(
+        this.httpService.get(`${serverUrl}/analyze/themes`)
+      );
+      
+      const themes = response.data;
+      if (themes && Array.isArray(themes)) {
+        this.cache.set(cacheKey, { data: themes, timestamp: Date.now() });
+        return themes;
+      }
+      return [];
+    } catch (error) {
+      this.logger.error(`Error fetching theme clustering: ${error.message}`);
+      return [];
     }
   }
 }

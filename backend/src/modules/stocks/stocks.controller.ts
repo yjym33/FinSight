@@ -14,6 +14,22 @@ export class StocksController {
     private readonly stocksService: StocksService,
   ) {}
 
+  @Get('market-indices')
+  @ApiOperation({ summary: 'Get main market indices (KOSPI, KOSDAQ)' })
+  async getMarketIndices() {
+    const [kospi, kosdaq] = await Promise.all([
+      this.kisService.getMarketIndex('0001'),
+      this.kisService.getMarketIndex('1001'),
+    ]);
+    return { kospi, kosdaq };
+  }
+
+  @Get('themes')
+  @ApiOperation({ summary: 'Get real-time market theme clustering' })
+  async getThemes() {
+    return this.analysisService.getThemeClustering();
+  }
+
   @Get('search')
   @ApiOperation({ summary: 'Search stocks by name or code' })
   async search(@Query('q') query: string) {

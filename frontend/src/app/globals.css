@@ -2,44 +2,107 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --toss-bg: #F2F4F6;
-  --toss-card-bg: #FFFFFF;
-  --toss-text-primary: #191F28;
-  --toss-text-secondary: #6B7684;
-  --toss-text-placeholder: #ADB5BD;
-  --toss-border: #F2F4F6;
-  --toss-blue: #3182F6;
-  --toss-red: #F04452;
-  --toss-green: #00D084;
-}
-
-.dark {
-  --toss-bg: #111827;
-  --toss-card-bg: #1F2937;
-  --toss-text-primary: #F9FAFB;
-  --toss-text-secondary: #9CA3AF;
-  --toss-text-placeholder: #6B7280;
-  --toss-border: #374151;
-  --toss-blue: #3B82F6;
-  --toss-red: #EF4444;
-  --toss-green: #10B981;
-}
-
 @layer base {
-  body {
-    @apply bg-toss-bg text-toss-text-primary transition-colors duration-200;
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 221.2 83.2% 53.3%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 221.2 83.2% 53.3%;
+
+    --radius: 1rem;
+
+    /* Backward compatibility for Toss variables */
+    --toss-bg: #F2F4F6;
+    --toss-card-bg: #FFFFFF;
+    --toss-text-primary: #191F28;
+    --toss-text-secondary: #6B7684;
+    --toss-text-placeholder: #ADB5BD;
+    --toss-border: #F2F4F6;
+    --toss-blue: #3182F6;
+    --toss-red: #F04452;
+    --toss-green: #00D084;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 217.2 91.2% 59.8%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 224.3 76.3% 48%;
+
+    /* Backward compatibility for Toss variables */
+    --toss-bg: #111827;
+    --toss-card-bg: #1F2937;
+    --toss-text-primary: #F9FAFB;
+    --toss-text-secondary: #9CA3AF;
+    --toss-text-placeholder: #6B7280;
+    --toss-border: #374151;
+    --toss-blue: #3B82F6;
+    --toss-red: #EF4444;
+    --toss-green: #10B981;
   }
 }
 
-/* Custom Utilities for Toss Design System with Theme Support */
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground transition-colors duration-200 antialiased;
+  }
+}
+
+/* Custom Utilities for Theme Support */
 @layer utilities {
   .bg-toss-bg { background-color: var(--toss-bg); }
-  .bg-white { background-color: var(--toss-card-bg); } /* Overriding white to card-bg in dark mode */
   .text-toss-text-primary { color: var(--toss-text-primary); }
   .text-toss-text-secondary { color: var(--toss-text-secondary); }
   .text-toss-text-placeholder { color: var(--toss-text-placeholder); }
-  .border-gray-100, .border-gray-50 { border-color: var(--toss-border); }
   .text-toss-red { color: var(--toss-red); }
   .text-toss-blue { color: var(--toss-blue); }
   .text-toss-green { color: var(--toss-green); }

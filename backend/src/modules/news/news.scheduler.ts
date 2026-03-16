@@ -4,6 +4,7 @@ import { NewsService } from './news.service';
 import { NewsApiService } from './news-api.service';
 import { WebsocketGateway } from '../websocket/websocket.gateway';
 import { News } from './entities/news.entity';
+import { AlertService } from '../notifications/alert.service';
 
 @Injectable()
 export class NewsScheduler {
@@ -13,6 +14,7 @@ export class NewsScheduler {
     private newsService: NewsService,
     private newsApiService: NewsApiService,
     private websocketGateway: WebsocketGateway,
+    private alertService: AlertService,
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
@@ -44,7 +46,12 @@ export class NewsScheduler {
         if (newItems.length > 0) {
           const savedNews = await this.newsService.createMany(newItems);
           this.logger.log(`Added ${savedNews.length} new news items for ${theme}`);
-          savedNews.forEach((news) => this.websocketGateway.broadcastNews(news));
+          savedNews.forEach((news) => {
+            this.websocketGateway.broadcastNews(news);
+            this.alertService.handleNewNews(news).catch(err => 
+              this.logger.error(`News alert failed for ${news.id}: ${err.message}`)
+            );
+          });
         }
       }
     } catch (error) {

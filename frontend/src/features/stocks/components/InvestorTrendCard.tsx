@@ -40,7 +40,7 @@ const TrendBar = ({ label, value, maxAbsValue, chartColorStyle }: { label: strin
           {formatNumber(value)}주
         </span>
       </div>
-      <div className="w-full h-[6px] bg-toss-bg rounded-full overflow-hidden relative">
+      <div className="w-full h-[6px] bg-toss-bg dark:bg-slate-800 rounded-full overflow-hidden relative">
         <motion.div
           initial={{ width: 0 }}
           animate={{ width: `${widthPercent}%` }}
@@ -69,7 +69,7 @@ export const InvestorTrendCard: React.FC<InvestorTrendCardProps> = ({ stockCode 
   // Render nothing or a skeleton while loading
   if (isLoading) {
     return (
-      <div className="mt-8 bg-white rounded-toss-large p-8 shadow-toss border border-gray-100 animate-pulse">
+      <div className="mt-8 bg-white dark:bg-slate-900 rounded-toss-large p-8 shadow-toss border border-gray-100 dark:border-slate-800 animate-pulse">
         <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
         <div className="space-y-4">
           {[1, 2, 3].map((i) => (
@@ -107,7 +107,7 @@ export const InvestorTrendCard: React.FC<InvestorTrendCardProps> = ({ stockCode 
     : '최근';
 
   return (
-    <div className="mt-8 bg-white rounded-toss-large p-8 shadow-toss border border-gray-100">
+    <div className="mt-8 bg-white dark:bg-slate-900 rounded-toss-large p-8 shadow-toss border border-gray-100 dark:border-slate-800">
       <div className="flex justify-between items-center mb-4">
         <h4 className="text-[17px] font-bold text-toss-text-primary">투자자 매매동향</h4>
         <span className="text-[12px] text-toss-text-secondary">{formattedDate} 기준</span>

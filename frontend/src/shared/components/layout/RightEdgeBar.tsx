@@ -16,7 +16,7 @@ export function RightEdgeBar() {
   ] as const;
 
   return (
-    <div className="fixed right-0 top-0 z-50 flex h-full w-[60px] flex-col items-center border-l border-gray-100 bg-white py-8 shadow-[-1px_0_0_rgb(0,0,0,0.02)]">
+    <div className="fixed right-0 top-0 z-50 flex h-full w-[60px] flex-col items-center border-l border-gray-100 dark:border-slate-800 bg-white dark:bg-slate-900 py-8 shadow-[-1px_0_0_rgb(0,0,0,0.02)] dark:shadow-none">
       <div className="flex flex-col gap-6">
         {buttons.map((btn) => {
           const isActive = activeTab === btn.id;
@@ -25,13 +25,13 @@ export function RightEdgeBar() {
               key={btn.id}
               onClick={() => toggleTab(btn.id)}
               className={cn(
-                "group relative flex flex-col items-center gap-1.5 transition-all",
-                isActive ? "text-toss-blue" : "text-toss-text-secondary hover:text-toss-text-primary"
+                "group relative flex flex-col items-center gap-1.5 transition-all text-toss-text-secondary dark:text-slate-400",
+                isActive ? "text-toss-blue dark:text-toss-blue" : "hover:text-toss-text-primary dark:hover:text-slate-200"
               )}
             >
               <div className={cn(
                 "flex h-10 w-10 items-center justify-center rounded-xl transition-all",
-                isActive ? "bg-toss-blue/10" : "group-hover:bg-toss-bg"
+                isActive ? "bg-toss-blue/10" : "group-hover:bg-toss-bg dark:group-hover:bg-slate-800"
               )}>
                 <btn.icon className={cn("h-6 w-6", isActive ? "fill-toss-blue" : "")} />
               </div>
@@ -46,7 +46,7 @@ export function RightEdgeBar() {
       </div>
 
       <div className="mt-auto pointer-events-none opacity-20">
-         <span className="text-[10px] font-bold text-gray-400 rotate-90 whitespace-nowrap mb-8 block">INVEST</span>
+         <span className="text-[10px] font-bold text-gray-400 dark:text-slate-500 rotate-90 whitespace-nowrap mb-8 block">INVEST</span>
       </div>
     </div>
   );
