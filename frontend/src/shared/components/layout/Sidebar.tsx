@@ -10,7 +10,8 @@ import {
   Sparkles,
   ArrowRight,
   TrendingUp,
-  BrainCircuit
+  BrainCircuit,
+  Zap
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
@@ -21,6 +22,7 @@ import { Button } from '@/components/ui/button';
 
 const menuItems = [
   { href: '/dashboard', label: '대시보드', icon: LayoutDashboard },
+  { href: '/themes', label: '테마 분석', icon: Zap },
   { href: '/compare', label: '종목 비교', icon: BarChart2 },
   { href: '/news', label: '매크로 뉴스', icon: Newspaper, badge: 'New' },
   { href: '/community', label: '커뮤니티', icon: Users },
@@ -40,7 +42,7 @@ export function Sidebar() {
               <TrendingUp className="h-6 w-6 text-white" />
            </div>
            <div className="flex flex-col">
-              <span className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100 uppercase">FinSight</span>
+              <span className="text-xl font-black tracking-tight text-slate-900 dark:text-slate-100 uppercase" onClick={() => window.location.href='/dashboard'}>FinSight</span>
               <span className="text-[10px] font-black tracking-[0.2em] text-toss-blue uppercase">Pro Terminal</span>
            </div>
         </div>

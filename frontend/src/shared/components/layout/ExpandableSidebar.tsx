@@ -2,7 +2,7 @@
 
 import { useGlobalSidebarStore } from '@/shared/store/sidebarStore';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Heart, Clock, TrendingUp, Wallet, Search, Plus } from 'lucide-react';
+import { X, Heart, Clock, TrendingUp, Wallet, Search, Plus, Trash2, Check, ChevronDown, ChevronRight } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import api from '@/shared/api/api';
@@ -15,15 +15,127 @@ import { useRecentStocksStore } from '@/features/stocks/store/recentStocksStore'
 import { SidebarSearchResultList } from '@/shared/components/layout/sidebar/SidebarSearchResultList';
 import { useTheme } from '@/shared/providers/ThemeProvider';
 
+function WatchlistItem({ item, isEditMode, onRemove }: { item: any, isEditMode: boolean, onRemove: () => void }) {
+  const router = useRouter();
+  const { stockPrices } = useWebSocket();
+  const { settings } = useTheme();
+  
+  const wsPrice = stockPrices[item.stockCode];
+  const currentPrice = Number(wsPrice?.price || 0);
+  const changePercent = wsPrice?.changePercent || 0;
+  const isUp = Number(wsPrice?.change || 0) >= 0;
+  
+  const chartColorStyle = settings?.chartColorStyle || 'kr';
+  const colorClass = isUp 
+    ? (chartColorStyle === 'kr' ? 'text-toss-red' : 'text-toss-green')
+    : (chartColorStyle === 'kr' ? 'text-toss-blue' : 'text-toss-red');
+
+  const handleDragStart = (e: React.DragEvent) => {
+    e.dataTransfer.setData('stockCode', item.stockCode);
+    e.dataTransfer.effectAllowed = 'move';
+    // Add a ghost image or just styling if needed
+  };
+
+  return (
+    <div 
+      draggable 
+      onDragStart={handleDragStart}
+      className="flex items-center gap-2 group cursor-grab active:cursor-grabbing"
+    >
+      <button
+        onClick={() => !isEditMode && router.push(`/stocks/${item.stockCode}`)}
+        className={cn(
+          "flex-1 flex items-center justify-between p-3 rounded-2xl hover:bg-toss-bg dark:hover:bg-slate-800 transition-all",
+          isEditMode ? "cursor-default" : "cursor-pointer"
+        )}
+      >
+        <div className="flex items-center gap-3">
+          <div className="h-10 w-10 rounded-full bg-toss-bg dark:bg-slate-800 flex items-center justify-center text-[12px] font-bold text-toss-text-secondary dark:text-slate-500">
+            {item.stockName?.[0] || 'S'}
+          </div>
+          <div className="text-left">
+            <p className="text-[14px] font-bold text-toss-text-primary dark:text-slate-200">{item.stockName}</p>
+            <p className="text-[11px] text-toss-text-secondary dark:text-slate-500 font-medium">{item.stockCode}</p>
+          </div>
+        </div>
+        <div className="text-right">
+          {currentPrice > 0 ? (
+            <>
+              <p className="text-[14px] font-bold text-toss-text-primary dark:text-slate-200">
+                {currentPrice.toLocaleString()}
+              </p>
+              <p className={cn("text-[12px] font-bold", colorClass)}>
+                {Number(changePercent) > 0 ? '+' : ''}{changePercent}%
+              </p>
+            </>
+          ) : (
+            <p className="text-[13px] text-toss-text-placeholder dark:text-slate-500 font-medium">시세 대기 중</p>
+          )}
+        </div>
+      </button>
+      {isEditMode && (
+        <button 
+          onClick={onRemove}
+          className="p-2 mr-1 rounded-xl bg-red-50 dark:bg-red-900/10 text-toss-red hover:bg-red-100 dark:hover:bg-red-900/20 transition-colors"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 export function ExpandableSidebar() {
   const { settings } = useTheme();
   const { isOpen, activeTab, close } = useGlobalSidebarStore();
   const { stockPrices, subscribeStock } = useWebSocket();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [isAddingGroup, setIsAddingGroup] = useState(false);
+  const [newGroupName, setNewGroupName] = useState('');
+  const [dragOverGroupId, setDragOverGroupId] = useState<string | null>(null);
+  const [dragCounter, setDragCounter] = useState(0);
+
+  const handleDragEnter = (e: React.DragEvent, groupId: string | null) => {
+    e.preventDefault();
+    setDragCounter(prev => prev + 1);
+    setDragOverGroupId(groupId);
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setDragCounter(prev => {
+      const newVal = prev - 1;
+      if (newVal === 0) setDragOverGroupId(null);
+      return newVal;
+    });
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+  };
+
+  const handleDrop = async (e: React.DragEvent, targetGroupId: string | null) => {
+    e.preventDefault();
+    setDragOverGroupId(null);
+    setDragCounter(0);
+    const stockCode = e.dataTransfer.getData('stockCode');
+    if (!stockCode) return;
+
+    try {
+      await api.patch('/watchlist/move', { 
+        stockCode, 
+        groupId: targetGroupId === 'unassigned' ? null : targetGroupId 
+      });
+      refetchWatchlist();
+    } catch (error) {
+      console.error('Failed to move stock:', error);
+    }
+  };
 
   const { accessToken, _hasHydrated } = useAuthStore();
-  const { data: watchlist } = useQuery({
+  const { data: watchlist, refetch: refetchWatchlist } = useQuery({
     queryKey: ['watchlist'],
     queryFn: async () => {
       const response = await api.get('/watchlist');
@@ -40,8 +152,12 @@ export function ExpandableSidebar() {
   });
 
   useEffect(() => {
-    if (watchlist?.length > 0) {
-      watchlist.forEach((item: { stockCode: string }) => {
+    if (watchlist) {
+      const allItems = [
+        ...(watchlist.unassigned || []),
+        ...(watchlist.groups?.flatMap((g: any) => g.items) || [])
+      ];
+      allItems.forEach((item: { stockCode: string }) => {
         subscribeStock(item.stockCode);
       });
     }
@@ -139,63 +255,135 @@ export function ExpandableSidebar() {
             {/* Content Area */}
             <div className="flex-1 overflow-y-auto custom-scrollbar px-6 py-4">
               {activeTab === 'watchlist' && (
-                <div className="space-y-4">
-                  {watchlist?.length > 0 ? watchlist.map((item: any) => {
-                    const wsPrice = stockPrices[item.stockCode];
-                    const currentPrice = Number(wsPrice?.price || 0);
-                    const changePercent = wsPrice?.changePercent || 0;
-                    const isUp = Number(wsPrice?.change || 0) >= 0;
-                    
-                    const chartColorStyle = settings?.chartColorStyle || 'kr';
-                    const colorClass = isUp 
-                      ? (chartColorStyle === 'kr' ? 'text-toss-red' : 'text-toss-green')
-                      : (chartColorStyle === 'kr' ? 'text-toss-blue' : 'text-toss-red');
-                    
-                    return (
-                      <button
-                        key={item.stockCode}
-                        onClick={() => router.push(`/stocks/${item.stockCode}`)}
-                        className="w-full flex items-center justify-between p-3 rounded-2xl hover:bg-toss-bg dark:hover:bg-slate-800 group transition-all"
-                      >
-                        <div className="flex items-center gap-3">
-                           <div className="h-10 w-10 rounded-full bg-toss-bg dark:bg-slate-800 flex items-center justify-center text-[12px] font-bold text-toss-text-secondary dark:text-slate-500">
-                              {item.stockName?.[0] || 'S'}
-                           </div>
-                           <div className="text-left">
-                              <p className="text-[14px] font-bold text-toss-text-primary dark:text-slate-200">{item.stockName}</p>
-                              <p className="text-[11px] text-toss-text-secondary dark:text-slate-500 font-medium">{item.stockCode}</p>
-                           </div>
-                        </div>
-                        <div className="text-right">
-                           {currentPrice > 0 ? (
-                             <>
-                               <p className="text-[14px] font-bold text-toss-text-primary">
-                                 {currentPrice.toLocaleString()}
-                               </p>
-                               <p className={cn(
-                                 "text-[12px] font-bold",
-                                 colorClass
-                               )}>
-                                 {Number(changePercent) > 0 ? '+' : ''}{changePercent}%
-                               </p>
-                             </>
-                           ) : (
-                             <p className="text-[13px] text-toss-text-placeholder dark:text-slate-500 font-medium">시세 대기 중</p>
-                           )}
-                        </div>
-                      </button>
-                    )
-                  }) : (
-                    <div className="flex flex-col items-center justify-center pt-20 text-center">
-                       <span className="text-3xl mb-4 grayscale opacity-40">🔔</span>
-                       <p className="text-[13px] text-toss-text-secondary dark:text-slate-400 leading-relaxed">
-                         관심 주식을 추가해보세요.<br/>실시간 정보를 모아볼 수 있어요.
-                       </p>
-                       <button className="mt-4 flex items-center gap-1 text-[14px] font-bold text-toss-blue hover:underline">
-                         <Plus className="h-4 w-4" />
-                         종목 검색하러 가기
+                <div className="space-y-6">
+                  {/* Create Group Input */}
+                  {isAddingGroup && (
+                    <div className="p-3 bg-toss-bg dark:bg-slate-800 rounded-2xl flex items-center gap-2">
+                       <input 
+                        autoFocus
+                        type="text"
+                        value={newGroupName}
+                        onChange={(e) => setNewGroupName(e.target.value)}
+                        onKeyDown={async (e) => {
+                          if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+                            if (!newGroupName.trim()) return;
+                            try {
+                              await api.post('/watchlist/groups', { name: newGroupName });
+                              setNewGroupName('');
+                              setIsAddingGroup(false);
+                              refetchWatchlist();
+                            } catch (error) {
+                              console.error('Failed to create group:', error);
+                            }
+                          }
+                        }}
+                        placeholder="그룹 이름 입력"
+                        className="flex-1 bg-transparent border-none outline-none text-sm font-bold placeholder:text-toss-text-placeholder"
+                       />
+                       <button 
+                        onClick={() => setIsAddingGroup(false)}
+                        className="text-xs font-bold text-toss-text-secondary"
+                       >
+                         취소
                        </button>
                     </div>
+                  )}
+
+                  {watchlist && (
+                    <>
+                      {/* Groups */}
+                      {watchlist.groups?.map((group: any) => (
+                        <div 
+                          key={group.id} 
+                          className={cn(
+                            "space-y-2 p-2 rounded-2xl transition-all border-2 border-transparent",
+                            dragOverGroupId === group.id && "bg-toss-blue/5 border-toss-blue/20 scale-[1.01] shadow-sm"
+                          )}
+                          onDragEnter={(e) => handleDragEnter(e, group.id)}
+                          onDragLeave={handleDragLeave}
+                          onDragOver={handleDragOver}
+                          onDrop={(e) => handleDrop(e, group.id)}
+                        >
+                          <div className="flex items-center justify-between px-2 pointer-events-none">
+                            <h3 className="text-[12px] font-black text-toss-text-placeholder dark:text-slate-500 uppercase tracking-widest">{group.name}</h3>
+                            {isEditMode && (
+                              <button 
+                                onClick={async (e) => {
+                                  e.stopPropagation();
+                                  if (confirm(`'${group.name}' 그룹을 삭제하시겠습니까?`)) {
+                                    await api.delete(`/watchlist/groups/${group.id}`);
+                                    refetchWatchlist();
+                                  }
+                                }}
+                                className="p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg group pointer-events-auto"
+                              >
+                                <X className="h-3 w-3 text-toss-text-placeholder group-hover:text-toss-red" />
+                              </button>
+                            )}
+                          </div>
+                          <div className="space-y-1">
+                            {group.items?.map((item: any) => (
+                              <WatchlistItem 
+                                key={item.stockCode} 
+                                item={item} 
+                                isEditMode={isEditMode}
+                                onRemove={async () => {
+                                  await api.delete(`/watchlist/${item.stockCode}`);
+                                  refetchWatchlist();
+                                }}
+                              />
+                            ))}
+                            {group.items?.length === 0 && (
+                              <div className="py-8 text-center border-2 border-dashed border-gray-100 dark:border-slate-800 rounded-2xl opacity-50">
+                                <p className="text-[11px] text-toss-text-placeholder">여기에 드래그하여 추가</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+
+                      {/* Unassigned Items */}
+                      <div 
+                        className={cn(
+                          "space-y-1 p-2 rounded-2xl transition-all border-2 border-transparent",
+                          dragOverGroupId === 'unassigned' && "bg-toss-bg border-gray-100"
+                        )}
+                        onDragEnter={(e) => handleDragEnter(e, 'unassigned')}
+                        onDragLeave={handleDragLeave}
+                        onDragOver={handleDragOver}
+                        onDrop={(e) => handleDrop(e, 'unassigned')}
+                      >
+                        {watchlist.unassigned?.length > 0 && watchlist.groups?.length > 0 && (
+                          <div className="px-2 mb-2 pointer-events-none">
+                            <h3 className="text-[12px] font-black text-toss-text-placeholder dark:text-slate-500 uppercase tracking-widest">기본 그룹</h3>
+                          </div>
+                        )}
+                        {watchlist.unassigned?.map((item: any) => (
+                          <WatchlistItem 
+                            key={item.stockCode} 
+                            item={item} 
+                            isEditMode={isEditMode}
+                            onRemove={async () => {
+                              await api.delete(`/watchlist/${item.stockCode}`);
+                              refetchWatchlist();
+                            }}
+                          />
+                        ))}
+                      </div>
+
+                      {watchlist.unassigned?.length === 0 && (watchlist.groups || []).every((g: any) => g.items?.length === 0) && !isAddingGroup && (
+                        <div className="flex flex-col items-center justify-center pt-20 text-center">
+                          <span className="text-3xl mb-4 grayscale opacity-40">🔔</span>
+                          <p className="text-[13px] text-toss-text-secondary dark:text-slate-400 leading-relaxed">
+                            관심 주식을 추가해보세요.<br/>실시간 정보를 모아볼 수 있어요.
+                          </p>
+                          <button className="mt-4 flex items-center gap-1 text-[14px] font-bold text-toss-blue hover:underline">
+                            <Plus className="h-4 w-4" />
+                            종목 검색하러 가기
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               )}
@@ -324,10 +512,25 @@ export function ExpandableSidebar() {
             </div>
 
             {/* Bottom Utility */}
-            <div className="p-6 border-t border-gray-50 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
-                <button className="text-[13px] font-bold text-toss-text-secondary dark:text-slate-500 hover:text-toss-text-primary dark:hover:text-slate-300 transition-colors">편집</button>
-                <button className="text-[13px] font-bold text-toss-blue hover:underline">새 그룹 만들기</button>
-            </div>
+            {activeTab === 'watchlist' && (
+              <div className="p-6 border-t border-gray-50 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900">
+                  <button 
+                    onClick={() => setIsEditMode(!isEditMode)}
+                    className={cn(
+                      "text-[13px] font-bold transition-colors",
+                      isEditMode ? "text-toss-blue" : "text-toss-text-secondary dark:text-slate-500 hover:text-toss-text-primary dark:hover:text-slate-300"
+                    )}
+                  >
+                    {isEditMode ? '완료' : '편집'}
+                  </button>
+                  <button 
+                    onClick={() => setIsAddingGroup(true)}
+                    className="text-[13px] font-bold text-toss-blue hover:underline"
+                  >
+                    새 그룹 만들기
+                  </button>
+              </div>
+            )}
           </div>
         </motion.aside>
       )}

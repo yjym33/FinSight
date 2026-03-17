@@ -66,13 +66,15 @@ class MarketService:
         try:
             # 1. Fetch Market Indices
             indices_response = requests.get(f"{self.backend_url}/stocks/market-indices")
-            indices = indices_response.json() if indices_response.status_code == 200 else {}
+            indices_data = indices_response.json() if indices_response.status_code == 200 else {}
+            indices = indices_data.get('data', {}) if isinstance(indices_data, dict) else {}
             
             # 2. Fetch latest domestic news specifically about KOSPI/Market
-            news_response = requests.get(f"{self.backend_url}/news", params={"q": "코스피", "limit": 5})
-            news_data = news_response.json() if news_response.status_code == 200 else []
+            news_resp = requests.get(f"{self.backend_url}/news", params={"q": "코스피", "limit": 5})
+            news_data = news_resp.json() if news_resp.status_code == 200 else {}
             
-            news: List[Dict[str, Any]] = cast(List[Dict[str, Any]], news_data) if isinstance(news_data, list) else []
+            news_list = news_data.get('data', []) if isinstance(news_data, dict) else []
+            news: List[Dict[str, Any]] = cast(List[Dict[str, Any]], news_list)
             
             # 3. Format index data
             kospi = indices.get('kospi', {})
@@ -119,7 +121,8 @@ class MarketService:
         try:
             # 1. Fetch ranking data from backend
             response = requests.get(f"{self.backend_url}/stocks/ranking/volume", params={"market": "J", "type": "volume"})
-            ranking_data = response.json() if response.status_code == 200 else []
+            ranking_resp = response.json() if response.status_code == 200 else {}
+            ranking_data = ranking_resp.get('data', []) if isinstance(ranking_resp, dict) else []
             
             if not ranking_data:
                 return []
@@ -130,7 +133,8 @@ class MarketService:
 
             # 3. Fetch very recent news to get theme context
             news_response = requests.get(f"{self.backend_url}/news", params={"limit": 20})
-            recent_news = news_response.json() if news_response.status_code == 200 else []
+            news_resp_data = news_response.json() if news_response.status_code == 200 else {}
+            recent_news = news_resp_data.get('data', []) if isinstance(news_resp_data, dict) else []
             news_context = "\n".join([f"- {n.get('title')}" for n in recent_news[:10]])
 
             # 4. Prepare Clustering Prompt

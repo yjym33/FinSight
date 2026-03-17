@@ -33,6 +33,7 @@ import { NewsCard } from '@/features/news/components/NewsCard';
 import { useRecentStocksStore } from '@/features/stocks/store/recentStocksStore';
 import { StockCommunity } from '@/features/community/components/StockCommunity';
 import { InvestorTrendCard } from '@/features/stocks/components/InvestorTrendCard';
+import { CompanyIntroCard } from '@/features/stocks/components/CompanyIntroCard';
 
 // Shadcn UI Components
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -245,12 +246,17 @@ export default function StockDetailPage() {
 
           {/* Right Column: AI & Strategy */}
           <div className="xl:col-span-4 flex flex-col gap-8">
-             <div className="sticky top-[84px] space-y-8">
-                <AIStockAnalysisCard 
-                  stockCode={stockCode}
-                  stockName={livePrice?.stockName || stockCode}
-                  changePercent={livePrice?.changePercent || 0}
-                />
+              <div className="sticky top-[84px] space-y-8">
+                 <CompanyIntroCard 
+                   stockCode={stockCode}
+                   stockName={livePrice?.stockName || stockCode}
+                 />
+
+                 <AIStockAnalysisCard 
+                   stockCode={stockCode}
+                   stockName={livePrice?.stockName || stockCode}
+                   changePercent={livePrice?.changePercent || 0}
+                 />
 
                 <InvestorTrendCard stockCode={stockCode} />
 

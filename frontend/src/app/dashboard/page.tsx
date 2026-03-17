@@ -179,12 +179,23 @@ export default function DashboardPage() {
           </div>
 
           <div className="space-y-6">
-            <div className="flex items-center gap-3 mb-2">
-              <div className="p-2 bg-toss-blue/10 rounded-xl">
-                 <TrendingUp className="h-5 w-5 text-toss-blue" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-toss-blue/10 rounded-xl">
+                   <TrendingUp className="h-5 w-5 text-toss-blue" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">실시간 테마 분석</h2>
+                <Badge variant="outline" className="ml-2 border-toss-blue/20 text-toss-blue">AI 클러스터링</Badge>
               </div>
-              <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">실시간 테마 분석</h2>
-              <Badge variant="outline" className="ml-2 border-toss-blue/20 text-toss-blue">AI 클러스터링</Badge>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="group flex items-center gap-1 text-slate-500 hover:text-toss-blue font-bold rounded-xl"
+                onClick={() => router.push('/themes')}
+              >
+                상세보기
+                <ChevronRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+              </Button>
             </div>
             <ThemeClustering />
           </div>

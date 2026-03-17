@@ -10,7 +10,7 @@ export const stocksService = {
     return response.data;
   },
   getStockAnalysis: async (stockCode: string) => {
-    const response = await api.get<{ reason: string; points: string[]; score: number }>(`/stocks/${stockCode}/analysis`);
+    const response = await api.get<{ description: string; reason: string; points: string[]; score: number }>(`/stocks/${stockCode}/analysis`);
     return response.data;
   },
   getRanking: async (market: '전체' | '코스피' | '코스닥' = '전체', type: 'volume' | 'gainers' | 'losers' = 'volume') => {
@@ -39,6 +39,13 @@ export const stocksService = {
       stocks: string[];
       strength: number;
     }[]>('/stocks/themes');
+    return response.data;
+  },
+  getMarketIndices: async () => {
+    const response = await api.get<{
+      kospi: { price: number; change: number; changePercent: number };
+      kosdaq: { price: number; change: number; changePercent: number };
+    }>('/stocks/market-indices');
     return response.data;
   },
 };
