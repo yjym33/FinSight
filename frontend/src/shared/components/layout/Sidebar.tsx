@@ -11,12 +11,14 @@ import {
   ArrowRight,
   TrendingUp,
   BrainCircuit,
-  Zap
+  Zap,
+  LogOut
 } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { cn } from '@/shared/lib/utils';
 import { useGlobalSidebarStore } from '@/shared/store/sidebarStore';
+import { useAuthStore } from '@/features/auth/store/authStore';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 
@@ -32,7 +34,16 @@ const menuItems = [
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { toggleTab } = useGlobalSidebarStore();
+  const { logout } = useAuthStore();
+
+  const handleLogout = () => {
+    if (confirm('로그아웃 하시겠습니까?')) {
+      logout();
+      router.push('/login');
+    }
+  };
 
   return (
     <aside className="sticky top-0 hidden lg:flex h-screen w-[300px] flex-col border-r border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 backdrop-blur-xl z-40 transition-all">
@@ -83,6 +94,16 @@ export function Sidebar() {
             </Link>
           );
         })}
+
+        <div className="pt-4 mt-4 border-t border-slate-100 dark:border-slate-800/50">
+          <button
+            onClick={handleLogout}
+            className="group flex w-full items-center gap-4 rounded-2xl px-5 py-4 text-[15px] font-black text-slate-500 transition-all duration-300 hover:bg-rose-50 dark:hover:bg-rose-950/20 hover:text-rose-600"
+          >
+            <LogOut className="h-5 w-5 text-slate-400 group-hover:text-rose-500 transition-all duration-300 group-hover:scale-110" />
+            <span>로그아웃</span>
+          </button>
+        </div>
       </nav>
 
       <div className="p-6">

@@ -1,6 +1,6 @@
 'use client';
 
-import { Search, Bell, User as UserIcon, LogOut, Command, Settings } from 'lucide-react';
+import { Search, Bell, User as UserIcon, Command, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { Button } from '@/components/ui/button';
@@ -9,12 +9,8 @@ import { Badge } from '@/components/ui/badge';
 
 export function Header() {
   const router = useRouter();
-  const { user, logout } = useAuthStore();
+  const { user } = useAuthStore();
 
-  const handleLogout = () => {
-    logout();
-    router.push('/login');
-  };
 
   return (
     <header className="sticky top-0 z-40 flex h-24 items-center justify-between border-b border-slate-200 dark:border-slate-800 bg-white/50 dark:bg-slate-900/50 px-10 backdrop-blur-xl">
@@ -53,15 +49,6 @@ export function Header() {
           <div className="h-12 w-12 rounded-2xl bg-gradient-to-tr from-slate-100 to-slate-50 dark:from-slate-800 dark:to-slate-900 shadow-inner flex items-center justify-center border border-slate-200 dark:border-slate-800 group cursor-pointer hover:scale-105 transition-all">
             <UserIcon className="h-6 w-6 text-slate-400 group-hover:text-toss-blue transition-colors" />
           </div>
-          <Button 
-            variant="ghost" 
-            size="icon"
-            onClick={handleLogout}
-            className="h-12 w-12 rounded-2xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/20 transition-all"
-            title="로그아웃"
-          >
-            <LogOut className="h-5 w-5" />
-          </Button>
         </div>
       </div>
     </header>
