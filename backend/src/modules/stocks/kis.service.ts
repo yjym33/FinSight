@@ -1,8 +1,14 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, HttpStatus } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 import * as fs from 'fs';
+import { RateLimiterService } from '../../common/rate-limiter/rate-limiter.service';
+import { 
+  KisApiException, 
+  KisAuthException, 
+  KisRateLimitException 
+} from '../../common/exceptions/kis.exception';
 
 @Injectable()
 export class KisService implements OnModuleInit {
@@ -10,31 +16,19 @@ export class KisService implements OnModuleInit {
   private accessToken: string | null = null;
   private tokenExpiresAt: number | null = null;
   
-  // Rate limiting & Caching
-  private nextRequestTime = 0;
-  private readonly minRequestInterval = 510; // Slightly over 500ms (2 req/sec)
+  // Local Caching & Request Coalescing
   private priceCache: Map<string, { data: any; timestamp: number }> = new Map();
-  private readonly cacheTTL = 5000; // Increase to 5 seconds to reduce redundant API calls
+  private readonly cacheTTL = 5000; 
   private pendingRequests: Map<string, Promise<any>> = new Map();
 
   constructor(
     private readonly configService: ConfigService,
     private readonly httpService: HttpService,
+    private readonly rateLimiterService: RateLimiterService,
   ) {}
 
   private async executeWithRateLimit<T>(task: () => Promise<T>): Promise<T> {
-    const now = Date.now();
-    let executeAt = Math.max(now, this.nextRequestTime);
-    
-    // Assign the next available time to the queue
-    this.nextRequestTime = executeAt + this.minRequestInterval;
-
-    const waitTime = executeAt - now;
-    if (waitTime > 0) {
-      await new Promise(resolve => setTimeout(resolve, waitTime));
-    }
-    
-    return task();
+    return this.rateLimiterService.waitAndExecute(task);
   }
 
   private tokenFetchPromise: Promise<void> | null = null;
@@ -46,6 +40,11 @@ export class KisService implements OnModuleInit {
   private async ensureValidToken() {
     // 1. If we have a valid token, we're good
     if (this.accessToken && this.tokenExpiresAt && Date.now() < this.tokenExpiresAt - 60000) {
+      return;
+    }
+
+    // 2. If we are in a cooldown (after EGW00133), dont try again for a bit
+    if (this.tokenExpiresAt && Date.now() < this.tokenExpiresAt) {
       return;
     }
 
@@ -78,19 +77,17 @@ export class KisService implements OnModuleInit {
         this.accessToken = response.data.access_token;
         this.tokenExpiresAt = Date.now() + (response.data.expires_in * 1000);
         this.logger.log('Successfully fetched KIS access token.');
-        fs.appendFileSync('debug.txt', `[${new Date().toISOString()}] Token Success\n`);
       } catch (error) {
         this.logger.error(`Failed to fetch KIS token: ${error.message}`);
-        fs.appendFileSync('debug.txt', `[${new Date().toISOString()}] Token Error: ${error.message}\n`);
         if (error.response) {
           this.logger.error(`Response data: ${JSON.stringify(error.response.data)}`);
-          
-          // If we hit the 1-minute limit, set a temporary expiration so we don't hammer it
-          // the error code EGW00133 is for the once-per-minute limit
           if (error.response.data.error_code === 'EGW00133') {
-              this.tokenExpiresAt = Date.now() + 60000; // Pretend it's "valid" for 1 min (but it won't be used) to cool down
+              this.tokenExpiresAt = Date.now() + 60000; 
+              this.logger.warn('Token fetch rate-limited (1min). Server will start without token for now.');
+              return;
           }
         }
+        throw new KisAuthException(error.message, error.response?.data);
       } finally {
         this.tokenFetchPromise = null;
       }
@@ -528,15 +525,13 @@ export class KisService implements OnModuleInit {
       if (response.data.rt_cd !== '0') {
         const err = `KIS API Error (${type}): ${response.data.msg1} (rt_cd: ${response.data.rt_cd})`;
         this.logger.error(err);
-        fs.appendFileSync('debug.txt', `[${new Date().toISOString()}] ${err}\nFull: ${JSON.stringify(response.data)}\n`);
-        return [];
+        throw new KisApiException(err, HttpStatus.BAD_GATEWAY, response.data);
       }
 
       if (!response.data.output || !Array.isArray(response.data.output) || response.data.output.length === 0) {
-        fs.appendFileSync('debug.txt', `[${new Date().toISOString()}] Ranking Empty/NoData: ${JSON.stringify(response.data)}\n`);
+        this.logger.warn(`Ranking Empty for ${type}`);
         return [];
       }
-      fs.appendFileSync('debug.txt', `[${new Date().toISOString()}] Ranking Success: ${response.data.output.length} items\n`);
 
       const results = response.data.output.slice(0, 30).map((item: any) => {
         const currentPrice = parseInt(item.stck_prpr);
@@ -561,12 +556,11 @@ export class KisService implements OnModuleInit {
     } catch (error) {
       const errMsg = `Failed to fetch ${type} ranking: ${error.message}`;
       this.logger.error(errMsg);
-      fs.appendFileSync('debug.txt', `[${new Date().toISOString()}] Catch Error: ${errMsg}\n`);
       if (error.response) {
         this.logger.error(`Error Response Data: ${JSON.stringify(error.response.data)}`);
-        fs.appendFileSync('debug.txt', `[${new Date().toISOString()}] Error Response: ${JSON.stringify(error.response.data)}\n`);
       }
-      return [];
+      if (error instanceof KisApiException) throw error;
+      throw new KisApiException(errMsg, HttpStatus.BAD_GATEWAY, error.response?.data);
     }
   }
   async getMarketIndex(indexCode: '0001' | '1001' = '0001') {

@@ -11,16 +11,16 @@ import { WebsocketModule } from './modules/websocket/websocket.module';
 import { StocksModule } from './modules/stocks/stocks.module';
 import { CommunityModule } from './modules/community/community.module';
 import { NotificationsModule } from './modules/notifications/notifications.module';
+import { RedisModule } from './common/redis/redis.module';
+import { RateLimiterModule } from './common/rate-limiter/rate-limiter.module';
 import { databaseConfig } from './config/database.config';
 
-/**
- * 최상위 루트 모듈 (AppModule)
- * 역할: 애플리케이션에 필요한 모든 모듈(환경설정, 데이터베이스, 스케줄러 기능 및 비즈니스 로직 모듈)들을 
- * 하나로 모아서 NestJS 백엔드를 조립하는 역할을 합니다.
- */
+import { validate } from './config/env.validation';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
+      validate,
       isGlobal: true,
       envFilePath: '.env',
     }),
@@ -39,6 +39,8 @@ import { databaseConfig } from './config/database.config';
     StocksModule,
     CommunityModule,
     NotificationsModule,
+    RedisModule,
+    RateLimiterModule,
   ],
 })
 export class AppModule {}

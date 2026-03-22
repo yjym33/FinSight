@@ -3,7 +3,7 @@
 import { Sparkles, TrendingUp, TrendingDown, Target, Zap, Loader2 } from 'lucide-react';
 import { cn } from '@/shared/lib/utils';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { stocksService } from '@/features/stocks/services/stocksService';
 import { useTheme } from '@/shared/providers/ThemeProvider';
 
@@ -17,29 +17,11 @@ export function AIStockAnalysisCard({ stockCode, stockName, changePercent }: AIS
   const { settings } = useTheme();
   const isPositive = changePercent >= 0;
 
-  const { data: analysis, isLoading } = useQuery({
+  const { data: analysis } = useSuspenseQuery({
     queryKey: ['stocks', 'analysis', stockCode],
     queryFn: () => stocksService.getStockAnalysis(stockCode),
-    enabled: !!stockCode,
     staleTime: 1000 * 60 * 30, // 30 mins
   });
-
-  if (isLoading) {
-    return (
-      <div className="bg-white dark:bg-slate-900 rounded-toss-large p-8 shadow-toss border border-gray-100 dark:border-slate-800 mb-6 flex flex-col items-center justify-center min-h-[300px]">
-        <Loader2 className="h-8 w-8 text-toss-blue animate-spin mb-4" />
-        <p className="text-toss-text-secondary dark:text-slate-400 font-medium text-[14px]">AI가 종목뉴스와 시세를 분석 중입니다...</p>
-      </div>
-    );
-  }
-
-  if (!analysis) {
-    return (
-      <div className="bg-white dark:bg-slate-900 rounded-toss-large p-8 shadow-toss border border-gray-100 dark:border-slate-800 mb-6 text-center">
-        <p className="text-toss-text-secondary dark:text-slate-400 font-medium text-[14px]">AI 분석 결과를 가져올 수 없습니다.</p>
-      </div>
-    );
-  }
 
   const chartColorStyle = settings?.chartColorStyle || 'kr';
   const upColorClass = chartColorStyle === 'kr' ? 'text-toss-red' : 'text-toss-green';

@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Inject, forwardRef } from '@nestjs/common';
 import { LLMService } from '../chat/llm.service';
 import { NewsService } from '../news/news.service';
 import { KisService } from './kis.service';
+import { StocksService } from './stocks.service';
 import { UsersSettingsService } from '../users/users-settings.service';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
@@ -17,13 +18,15 @@ export class AnalysisService {
     private readonly llmService: LLMService,
     private readonly newsService: NewsService,
     private readonly kisService: KisService,
+    @Inject(forwardRef(() => StocksService))
+    private readonly stocksService: StocksService,
     private readonly settingsService: UsersSettingsService,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {}
 
   async getStockAnalysis(stockCode: string, userId?: string) {
-    // 1. Check Cache (personalized cache or global? let's do global for now but different styles might need different cache keys)
+    // 1. Check Cache
     const cacheKey = userId ? `${stockCode}_${userId}` : stockCode;
     const cached = this.cache.get(cacheKey);
     if (cached && Date.now() - cached.timestamp < this.CACHE_TTL) {
@@ -32,9 +35,10 @@ export class AnalysisService {
 
     try {
       // 2. Fetch Data & User Settings
-      const [priceData, newsData, settings] = await Promise.all([
+      const [priceData, newsData, dbStock, settings] = await Promise.all([
         this.kisService.getStockPrice(stockCode),
         this.newsService.findByStockCode(stockCode),
+        this.stocksService.findOneByCode(stockCode),
         userId ? this.settingsService.findByUserId(userId) : Promise.resolve(null),
       ]);
 
@@ -59,7 +63,10 @@ export class AnalysisService {
 
       const newsTitles = newsData.slice(0, 5).map((n: any) => n.title).join('\n');
       const prompt = `당신은 전문적인 AI 투자 분석가입니다. 
-다음은 ${priceData.stockName} (${stockCode})의 현재 시장 데이터와 최근 뉴스입니다.
+다음은 ${priceData.stockName} (${stockCode})의 현재 시장 데이터와 최근 뉴스, 그리고 기업 정보입니다.
+
+[기업 정보]
+- 업종(Sector): ${dbStock?.sector || '알 수 없음'}
 
 [현재 시세]
 - 현재가: ${priceData.price}원
@@ -69,7 +76,7 @@ export class AnalysisService {
 ${newsTitles || '최근 관련 뉴스가 없습니다.'}
 
 이 데이터를 바탕으로 다음 사항들을 분석해 주세요:
-1. 이 회사가 어떤 사업을 하는 회사인지 처음 보는 사람도 알기 쉽게 1~2문장으로 설명 (description)
+1. 이 회사가 어떤 사업을 하는 회사인지 처음 보는 사람도 알기 쉽게 1~2문장으로 설명 (description). 반드시 제공된 '업종' 정보를 참고하여 사실에 기반해 작성해 주세요.
 2. 오늘 이 종목이 어떤 이유(뉴스, 수급, 업황 등)로 이런 변동폭을 보이는지 "한 줄 요약" (reason)
 3. 향후 투심에 영향을 줄 주요 투자 포인트 3가지 (points)
 4. 0~100점 사이의 'AI 투자 매력도 점수' (score)

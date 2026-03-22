@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit, Inject, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Like } from 'typeorm';
 import * as fs from 'fs';
@@ -19,6 +19,7 @@ export class StocksService implements OnModuleInit {
     @InjectRepository(Stock)
     private stockRepository: Repository<Stock>,
     private kisService: KisService,
+    @Inject(forwardRef(() => AnalysisService))
     private analysisService: AnalysisService,
   ) {}
 

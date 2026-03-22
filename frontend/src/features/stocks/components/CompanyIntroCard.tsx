@@ -2,9 +2,8 @@
 
 import { Info, Building2 } from 'lucide-react';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { stocksService } from '@/features/stocks/services/stocksService';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface CompanyIntroCardProps {
   stockCode: string;
@@ -12,24 +11,11 @@ interface CompanyIntroCardProps {
 }
 
 export function CompanyIntroCard({ stockCode, stockName }: CompanyIntroCardProps) {
-  const { data: analysis, isLoading } = useQuery({
+  const { data: analysis } = useSuspenseQuery({
     queryKey: ['stocks', 'analysis', stockCode],
     queryFn: () => stocksService.getStockAnalysis(stockCode),
-    enabled: !!stockCode,
     staleTime: 1000 * 60 * 30, // 30 mins
   });
-
-  if (isLoading) {
-    return (
-      <div className="bg-white dark:bg-slate-900 rounded-toss-large p-8 shadow-toss border border-gray-100 dark:border-slate-800 mb-6">
-        <div className="flex items-center gap-2 mb-4">
-          <Skeleton className="h-5 w-32" />
-        </div>
-        <Skeleton className="h-4 w-full mb-2" />
-        <Skeleton className="h-4 w-2/3" />
-      </div>
-    );
-  }
 
   if (!analysis?.description) {
     return null;

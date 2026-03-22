@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, memo } from 'react';
 import { createChart, ColorType, IChartApi, ISeriesApi } from 'lightweight-charts';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/shared/providers/ThemeProvider';
@@ -11,7 +11,7 @@ interface StockChartProps {
   isUp?: boolean;
 }
 
-export function StockChart({ data, color, isUp = true }: StockChartProps) {
+export const StockChart = memo(function StockChart({ data, color, isUp = true }: StockChartProps) {
   const { settings } = useTheme();
   const chartContainerRef = useRef<HTMLDivElement>(null);
   const chartRef = useRef<IChartApi | null>(null);
@@ -85,5 +85,9 @@ export function StockChart({ data, color, isUp = true }: StockChartProps) {
     };
   }, [data, mainColor, settings?.theme]);
 
+  // Use a unique display name for debugging
   return <div ref={chartContainerRef} className="w-full" />;
-}
+});
+
+// Use a unique display name for debugging
+StockChart.displayName = 'StockChart';

@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from 'next/navigation';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { 
   TrendingUp, 
   TrendingDown, 
@@ -13,7 +13,8 @@ import {
   Info,
   Newspaper,
   MessageSquare,
-  BarChart4
+  BarChart4,
+  Loader2
 } from 'lucide-react';
 import { useAuthStore } from '@/features/auth/store/authStore';
 import { useTheme } from '@/shared/providers/ThemeProvider';
@@ -34,6 +35,7 @@ import { useRecentStocksStore } from '@/features/stocks/store/recentStocksStore'
 import { StockCommunity } from '@/features/community/components/StockCommunity';
 import { InvestorTrendCard } from '@/features/stocks/components/InvestorTrendCard';
 import { CompanyIntroCard } from '@/features/stocks/components/CompanyIntroCard';
+import { ErrorBoundary } from '@/shared/components/common/ErrorBoundary';
 
 // Shadcn UI Components
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -247,23 +249,44 @@ export default function StockDetailPage() {
           {/* Right Column: AI & Strategy */}
           <div className="xl:col-span-4 flex flex-col gap-8">
               <div className="sticky top-[84px] space-y-8">
-                 <CompanyIntroCard 
-                   stockCode={stockCode}
+                 <ErrorBoundary>
+                    <Suspense fallback={
+                       <Card className="bg-white dark:bg-slate-900 rounded-toss-large p-8 shadow-toss border border-gray-100 dark:border-slate-800 mb-6">
+                         <div className="flex items-center gap-2 mb-4">
+                           <Skeleton className="h-5 w-32" />
+                         </div>
+                         <Skeleton className="h-4 w-full mb-2" />
+                         <Skeleton className="h-4 w-2/3" />
+                       </Card>
+                    }>
+                       <CompanyIntroCard 
+                         stockCode={stockCode}
+                         stockName={livePrice?.stockName || stockCode}
+                       />
+                    </Suspense>
+                 </ErrorBoundary>
+
+                 <ErrorBoundary>
+                    <Suspense fallback={
+                       <div className="bg-white dark:bg-slate-900 rounded-toss-large p-8 shadow-toss border border-gray-100 dark:border-slate-800 mb-6 flex flex-col items-center justify-center min-h-[300px]">
+                         <Loader2 className="h-8 w-8 text-toss-blue animate-spin mb-4" />
+                         <p className="text-toss-text-secondary dark:text-slate-400 font-medium text-[14px]">AI가 종목뉴스와 시세를 분석 중입니다...</p>
+                       </div>
+                    }>
+                       <AIStockAnalysisCard 
+                         stockCode={stockCode}
+                         stockName={livePrice?.stockName || stockCode}
+                         changePercent={livePrice?.changePercent || 0}
+                       />
+                    </Suspense>
+                 </ErrorBoundary>
+
+                 <InvestorTrendCard stockCode={stockCode} />
+
+                 <StockNotificationCard 
                    stockName={livePrice?.stockName || stockCode}
                  />
-
-                 <AIStockAnalysisCard 
-                   stockCode={stockCode}
-                   stockName={livePrice?.stockName || stockCode}
-                   changePercent={livePrice?.changePercent || 0}
-                 />
-
-                <InvestorTrendCard stockCode={stockCode} />
-
-                <StockNotificationCard 
-                  stockName={livePrice?.stockName || stockCode}
-                />
-             </div>
+              </div>
           </div>
         </main>
       </div>

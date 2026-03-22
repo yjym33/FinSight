@@ -89,6 +89,9 @@ export const useSocketStore = create<SocketState>((set, get) => ({
 
       newSocket.on('stock:price', (data: StockPrice) => {
         get().setStockPrice(data);
+        // Sync with React Query cache to maintain single source of truth
+        const { queryClient } = require('@/lib/queryClient');
+        queryClient.setQueryData(['stocks', 'price', data.stockCode], data);
       });
 
       newSocket.on('notification:new', (notification) => {
